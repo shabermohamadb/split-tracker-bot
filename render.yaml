@@ -1,0 +1,30 @@
+# Render deployment configuration for 24/7 Split Tracker Bot
+# Hook this repository up to Render.com to auto-deploy
+services:
+  - type: web
+    name: split-tracker-bot
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_VERSION
+        value: 20.0.0
+      - key: SPREADSHEET_URL
+        value: https://docs.google.com/spreadsheets/d/1lXrXb3ek7ewkPhx2WHuKPaJzUHqSHo2Lahvr58fXdZ4/edit?usp=sharing
+      - key: POLL_INTERVAL_MINUTES
+        value: 10
+      - key: DISCORD_TOKEN
+        sync: false # User will set this secret in the Render dashboard
+      - key: DISCORD_CLIENT_ID
+        sync: false # User will set this secret in the Render dashboard
+      - key: DISCORD_GUILD_ID
+        sync: false # User will set this secret in the Render dashboard
+      - key: DATABASE_URL
+        fromDatabase:
+          name: split-tracker-db
+          property: connectionString
+
+databases:
+  - name: split-tracker-db
+    plan: free # Deploys a free PostgreSQL database

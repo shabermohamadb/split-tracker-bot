@@ -7,7 +7,7 @@ module.exports = {
     .setDescription('Unlink your Discord account from your Albion Online IGN'),
   async execute(interaction) {
     const discordId = interaction.user.id;
-    const existingLink = db.getLinkByDiscordId(discordId);
+    const existingLink = await db.getLinkByDiscordId(discordId);
 
     if (!existingLink) {
       return await interaction.reply({
@@ -17,7 +17,7 @@ module.exports = {
     }
 
     try {
-      db.unlinkUser(discordId);
+      await db.unlinkUser(discordId);
       
       const embed = new EmbedBuilder()
         .setTitle('❌ Account Unlinked')

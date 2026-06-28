@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const http = require('http');
 const { Client, GatewayIntentBits, Collection, REST, Routes } = require('discord.js');
 const config = require('./config');
 const db = require('./database');
@@ -13,6 +14,22 @@ if (!config.discordToken || config.discordToken === 'YOUR_DISCORD_BOT_TOKEN_HERE
   console.error('Please configure DISCORD_TOKEN, DISCORD_CLIENT_ID, and SPREADSHEET_URL in your .env file.\n');
   process.exit(1);
 }
+
+// 🌐 Simple Web Server for Render 24/7 Deployment
+// Render requires binding to a port; we serve a simple status page
+const PORT = process.env.PORT || 3000;
+const server = http.createServer((req, res) => {
+  res.writeHead(200, { 'Content-Type': 'application/json' });
+  res.end(JSON.stringify({
+    status: 'online',
+    bot: client.user ? client.user.tag : 'connecting',
+    timestamp: new Date().toISOString()
+  }));
+});
+
+server.listen(PORT, () => {
+  console.log(`[Web Server] Listening on port ${PORT} to prevent Render from spinning down.`);
+});
 
 // Instantiate Discord client
 const client = new Client({
@@ -45,7 +62,7 @@ client.once('ready', async () => {
   console.log(`\n🤖 Logged in as ${client.user.tag}!`);
   
   // 1. Initialize DB
-  db.initDb();
+  await db.initDb();
   
   // 2. Register Slash Commands
   const rest = new REST().setToken(config.discordToken);
@@ -114,7 +131,7 @@ client.on('interactionCreate', async interaction => {
       await interaction.deferUpdate();
 
       try {
-        const link = db.getLinkByDiscordId(ownerDiscordId);
+        const link = await db.getLinkByDiscordId(ownerDiscordId);
         if (!link) {
           return await interaction.followUp({
             content: '❌ Account link not found. Use `/linkign <ign>` to link your account.',
@@ -127,7 +144,7 @@ client.on('interactionCreate', async interaction => {
         const matchedPlayer = players.find(p => p.name.toLowerCase() === link.ign.toLowerCase());
 
         if (matchedPlayer) {
-          db.updateCachedBalance(matchedPlayer.name, matchedPlayer.balance, matchedPlayer.total, matchedPlayer.fine);
+          await db.updateCachedBalance(matchedPlayer.name, matchedPlayer.balance, matchedPlayer.total, matchedPlayer.fine);
         }
 
         const embed = createSplitEmbed(link.ign, matchedPlayer);

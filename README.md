@@ -94,10 +94,37 @@ On startup, the bot registers all slash commands to your guild instantly (using 
 
 ---
 
-## File Structure
-- `src/index.js` - Bot bootloader, gateway connections, command router, button listeners.
+- `src/index.js` - Bot bootloader, health check HTTP server, gateway connections, command router, button listeners.
 - `src/config.js` - Configuration loader and Google URL parser.
-- `src/database.js` - Local database helper utilizing a lightweight, pure JS JSON storage (`data/db.json`).
+- `src/database.js` - Dual-mode database (PostgreSQL on cloud, JSON file locally).
 - `src/sheets.js` - Live Google Sheet exporter and parser.
 - `src/notifier.js` - Automated scheduler that checks for differences and triggers alerts.
 - `src/commands/` - Subdirectory hosting all slash command definitions.
+
+---
+
+## Deploying to Render (24/7 Free Hosting)
+
+This project contains a `render.yaml` blueprint that makes deploying on Render.com simple and persists database links for free.
+
+### Step-by-Step Deployment:
+1. **Push your code to GitHub/GitLab**: Push this bot's project folder to your own git repository.
+2. **Link to Render**:
+   - Go to [Render Dashboard](https://dashboard.render.com/) and click **New > Blueprint**.
+   - Connect your GitHub repository.
+3. **Configure Database & Secrets**:
+   - Render will read the `render.yaml` file, provision a free Node.js Web Service, and set up a free PostgreSQL database.
+   - You will be prompted to enter the missing environment variables in the Render dashboard:
+     - `DISCORD_TOKEN`
+     - `DISCORD_CLIENT_ID`
+     - `DISCORD_GUILD_ID`
+4. **Approve and Deploy**:
+   - Click **Apply** to deploy the database and web service. Once the web service builds, your bot will log into Discord!
+
+### Keeping the Bot Awake 24/7 (Free Tier Keep-Alive):
+Render's free tier web services spin down after 15 minutes of inactivity. To prevent this:
+1. Copy the public URL of your Render service (e.g., `https://split-tracker-bot.onrender.com`).
+2. Go to a free uptime monitoring service like [UptimeRobot](https://uptimerobot.com/) or [Cron-Job.org](https://cron-job.org/).
+3. Set up an HTTP monitor pointing to your Render URL that runs every **10 minutes**.
+4. This will trigger the bot's health check server in `src/index.js` and keep the bot active 24/7!
+

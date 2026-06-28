@@ -16,7 +16,7 @@ async function checkForUpdates(client) {
 
   try {
     const players = await fetchSheetData();
-    const cachedBalances = db.getAllCachedBalances();
+    const cachedBalances = await db.getAllCachedBalances();
 
     // Get notification channel if configured
     let notificationChannel = null;
@@ -45,10 +45,10 @@ async function checkForUpdates(client) {
           console.log(`[Notifier] Detected change for player "${player.name}": Balance ${cached.balance}M -> ${player.balance}M (${diffStr})`);
 
           // Check if user is linked to a Discord ID
-          const link = db.getLinkByIgn(player.name);
+          const link = await db.getLinkByIgn(player.name);
 
-          // Update SQLite Cache
-          db.updateCachedBalance(player.name, player.balance, player.total, player.fine);
+          // Update Cache
+          await db.updateCachedBalance(player.name, player.balance, player.total, player.fine);
 
           // 1. Send DM to the linked user if they exist
           if (link) {
@@ -110,7 +110,7 @@ async function checkForUpdates(client) {
         }
       } else {
         // First time seeing this player, just cache their info quietly (no notification to avoid spamming the server on bot load)
-        db.updateCachedBalance(player.name, player.balance, player.total, player.fine);
+        await db.updateCachedBalance(player.name, player.balance, player.total, player.fine);
         console.log(`[Notifier] Cached new player "${player.name}" with balance ${player.balance}M`);
       }
     }

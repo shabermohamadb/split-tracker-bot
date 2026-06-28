@@ -48,7 +48,7 @@ module.exports = {
     await interaction.deferReply();
 
     const discordId = interaction.user.id;
-    const link = db.getLinkByDiscordId(discordId);
+    const link = await db.getLinkByDiscordId(discordId);
 
     if (!link) {
       return await interaction.editReply({
@@ -63,7 +63,7 @@ module.exports = {
 
       // If player found, update local cache
       if (matchedPlayer) {
-        db.updateCachedBalance(matchedPlayer.name, matchedPlayer.balance, matchedPlayer.total, matchedPlayer.fine);
+        await db.updateCachedBalance(matchedPlayer.name, matchedPlayer.balance, matchedPlayer.total, matchedPlayer.fine);
       }
 
       const embed = createSplitEmbed(link.ign, matchedPlayer);

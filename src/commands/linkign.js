@@ -24,7 +24,7 @@ module.exports = {
       const targetIgn = matchedPlayer ? matchedPlayer.name : inputIgn;
       
       // Save link to database
-      db.linkUser(interaction.user.id, targetIgn);
+      await db.linkUser(interaction.user.id, targetIgn);
       
       const embed = new EmbedBuilder().setTimestamp();
 
