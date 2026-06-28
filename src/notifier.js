@@ -2,6 +2,7 @@ const { fetchSheetData } = require('./sheets');
 const db = require('./database');
 const config = require('./config');
 const { EmbedBuilder } = require('discord.js');
+const { detectIGN } = require('./utils');
 
 let isPolling = false;
 
@@ -45,7 +46,30 @@ async function checkForUpdates(client) {
           console.log(`[Notifier] Detected change for player "${player.name}": Balance ${cached.total}M -> ${player.total}M (${diffStr})`);
 
           // Check if user is linked to a Discord ID
-          const link = await db.getLinkByIgn(player.name);
+          let link = await db.getLinkByIgn(player.name);
+
+          // Proactively auto-detect and link player by their Discord nickname if not linked
+          if (!link) {
+            const guilds = client.guilds.cache.values();
+            for (const guild of guilds) {
+              try {
+                const members = await guild.members.fetch();
+                const matchedMember = members.find(member => {
+                  const displayName = member.displayName || member.user.username;
+                  return detectIGN(displayName, [player]) !== null;
+                });
+
+                if (matchedMember) {
+                  console.log(`[Notifier] Auto-detected and linked player "${player.name}" to Discord user ${matchedMember.user.tag} (${matchedMember.id})`);
+                  await db.linkUser(matchedMember.id, player.name);
+                  link = { discord_id: matchedMember.id, ign: player.name };
+                  break;
+                }
+              } catch (err) {
+                console.error(`[Notifier] Failed to fetch members for auto-linking in guild ${guild.id}:`, err.message);
+              }
+            }
+          }
 
           // Update Cache
           await db.updateCachedBalance(player.name, player.balance, player.total, player.fine);

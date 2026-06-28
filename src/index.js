@@ -1,7 +1,6 @@
 const fs = require('fs');
 const path = require('path');
 const http = require('http');
-const url = require('url');
 const { Client, GatewayIntentBits, Collection, REST, Routes } = require('discord.js');
 const config = require('./config');
 const db = require('./database');
@@ -19,7 +18,7 @@ if (!config.discordToken || config.discordToken === 'YOUR_DISCORD_BOT_TOKEN_HERE
 // 🌐 Web Server for Render 24/7 Deployment & Interactive Dashboard
 const PORT = process.env.PORT || 3000;
 const server = http.createServer(async (req, res) => {
-  const parsedUrl = url.parse(req.url, true);
+  const parsedUrl = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
   const pathname = parsedUrl.pathname;
 
   try {

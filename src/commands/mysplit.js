@@ -1,6 +1,7 @@
 const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const db = require('../database');
 const { fetchSheetData } = require('../sheets');
+const { detectIGN } = require('../utils');
 
 // Helper to construct the split embed
 function createSplitEmbed(ign, player) {
@@ -61,17 +62,29 @@ module.exports = {
     await interaction.deferReply();
 
     const discordId = interaction.user.id;
-    const link = await db.getLinkByDiscordId(discordId);
-
-    if (!link) {
-      return await interaction.editReply({
-        content: '❌ You have not linked your Albion Online IGN yet.\nUse `/linkign <your_ign>` to link your account.',
-      });
-    }
+    let link = await db.getLinkByDiscordId(discordId);
+    let autoSyncMessage = null;
 
     try {
       // Fetch latest sheet data
       const players = await fetchSheetData();
+
+      // Auto-detect IGN from Discord Display Name if not linked
+      if (!link) {
+        const displayName = interaction.member?.displayName || interaction.user.username;
+        const detectedIgn = detectIGN(displayName, players);
+
+        if (detectedIgn) {
+          await db.linkUser(discordId, detectedIgn);
+          link = { discord_id: discordId, ign: detectedIgn };
+          autoSyncMessage = `ℹ️ **Auto-Sync**: We detected your Albion IGN as **${detectedIgn}** from your Discord nickname and linked your account automatically!`;
+        } else {
+          return await interaction.editReply({
+            content: '❌ You have not linked your Albion Online IGN yet.\nUse `/linkign <your_ign>` to link your account.',
+          });
+        }
+      }
+
       const matchedPlayer = players.find(p => p.name.toLowerCase() === link.ign.toLowerCase());
 
       // If player found, update local cache
@@ -90,10 +103,12 @@ module.exports = {
 
       const row = new ActionRowBuilder().addComponents(refreshBtn);
 
-      await interaction.editReply({
-        embeds: [embed],
-        components: [row],
-      });
+      const payload = { embeds: [embed], components: [row] };
+      if (autoSyncMessage) {
+        payload.content = autoSyncMessage;
+      }
+
+      await interaction.editReply(payload);
     } catch (err) {
       console.error('Error in mysplit command:', err);
       return await interaction.editReply({
