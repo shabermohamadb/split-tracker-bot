@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const http = require('http');
+const url = require('url');
 const { Client, GatewayIntentBits, Collection, REST, Routes } = require('discord.js');
 const config = require('./config');
 const db = require('./database');
@@ -15,20 +16,46 @@ if (!config.discordToken || config.discordToken === 'YOUR_DISCORD_BOT_TOKEN_HERE
   process.exit(1);
 }
 
-// 🌐 Simple Web Server for Render 24/7 Deployment
-// Render requires binding to a port; we serve a simple status page
+// 🌐 Web Server for Render 24/7 Deployment & Interactive Dashboard
 const PORT = process.env.PORT || 3000;
-const server = http.createServer((req, res) => {
-  res.writeHead(200, { 'Content-Type': 'application/json' });
-  res.end(JSON.stringify({
-    status: 'online',
-    bot: client.user ? client.user.tag : 'connecting',
-    timestamp: new Date().toISOString()
-  }));
+const server = http.createServer(async (req, res) => {
+  const parsedUrl = url.parse(req.url, true);
+  const pathname = parsedUrl.pathname;
+
+  try {
+    if (pathname === '/' || pathname === '/index.html') {
+      res.writeHead(200, { 'Content-Type': 'text/html' });
+      res.end(fs.readFileSync(path.join(__dirname, '../public/index.html')));
+    } else if (pathname === '/style.css') {
+      res.writeHead(200, { 'Content-Type': 'text/css' });
+      res.end(fs.readFileSync(path.join(__dirname, '../public/style.css')));
+    } else if (pathname === '/app.js') {
+      res.writeHead(200, { 'Content-Type': 'application/javascript' });
+      res.end(fs.readFileSync(path.join(__dirname, '../public/app.js')));
+    } else if (pathname === '/api/splits') {
+      const players = await fetchSheetData();
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: true, players }));
+    } else if (pathname === '/api/status') {
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({
+        status: 'online',
+        bot: client.user ? client.user.tag : 'connecting',
+        timestamp: new Date().toISOString()
+      }));
+    } else {
+      res.writeHead(404, { 'Content-Type': 'text/plain' });
+      res.end('Not Found');
+    }
+  } catch (err) {
+    console.error(`[Web Server] Error serving ${req.url}:`, err.message);
+    res.writeHead(500, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ success: false, error: 'Internal Server Error' }));
+  }
 });
 
 server.listen(PORT, () => {
-  console.log(`[Web Server] Listening on port ${PORT} to prevent Render from spinning down.`);
+  console.log(`[Web Server] Listening on port ${PORT}. Open http://localhost:${PORT} in your browser.`);
 });
 
 // Instantiate Discord client

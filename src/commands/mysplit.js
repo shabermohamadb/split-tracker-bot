@@ -13,14 +13,27 @@ function createSplitEmbed(ign, player) {
 
   if (player) {
     embed.addFields(
-      { name: 'Current Balance', value: `\`${player.balance.toFixed(3)}M\` Silver`, inline: false },
-      { name: 'Total Payouts', value: `\`${player.total.toFixed(3)}M\` Silver`, inline: true },
+      { name: 'Current Balance (Withdrawable)', value: `\`${player.total.toFixed(3)}M\` Silver`, inline: false },
+      { name: 'Starting Balance (Till 14/06)', value: `\`${player.balance.toFixed(3)}M\` Silver`, inline: true },
       { name: 'Fines / Withdraws', value: `\`${player.fine.toFixed(3)}M\` Silver`, inline: true }
     );
+
+    // Add session history splits and comments
+    if (player.sessions && player.sessions.length > 0) {
+      const sessionList = player.sessions.map(s => {
+        const commentDetails = s.comments.length > 0 ? `\n   *Split details: ${s.comments.join(' | ')}*` : '';
+        return `• **${s.sessionName}**: \`+${s.amount.toFixed(3)}M\` Silver${commentDetails}`;
+      }).join('\n');
+
+      embed.addFields({ name: '📊 Recent Session Splits & Details', value: sessionList, inline: false });
+    } else {
+      embed.addFields({ name: '📊 Recent Session Splits & Details', value: '*No recent sessions recorded on this sheet.*', inline: false });
+    }
+
     // Add visual status indicator
-    if (player.balance > 0) {
+    if (player.total > 0.0001) {
       embed.setDescription(`Current loot split details for Albion IGN: **${ign}**\n🟢 You have withdrawable silver! Contact an administrator to request a payout.`);
-    } else if (player.balance < 0) {
+    } else if (player.total < -0.0001) {
       embed.setDescription(`Current loot split details for Albion IGN: **${ign}**\n🔴 You owe silver (fines/debts). Please pay an administrator.`);
       embed.setColor('#f44336'); // Red for negative balance
     } else {

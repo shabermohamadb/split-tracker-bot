@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Split Tracker Dashboard - AFTERMATH</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <!-- Background glow effects -->
+  <div class="bg-glow glow-1"></div>
+  <div class="bg-glow glow-2"></div>
+
+  <div class="container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="logo-section">
+        <div class="logo-icon">💰</div>
+        <div>
+          <h1>SPLIT TRACKER</h1>
+          <p class="subtitle">AFTERMATH LOOT MANAGEMENT SYSTEM</p>
+        </div>
+      </div>
+      <div class="server-status">
+        <span class="status-dot"></span>
+        <span id="status-text">Connecting to Bot...</span>
+      </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <nav class="nav-tabs">
+      <button class="tab-btn active" data-tab="search-section">🔍 Player Search</button>
+      <button class="tab-btn" data-tab="leaderboard-section">📋 Guild Standings</button>
+      <button class="tab-btn" data-tab="info-section">ℹ️ Help & Guide</button>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      
+      <!-- TAB 1: SEARCH & PROFILE -->
+      <section id="search-section" class="tab-content active">
+        <!-- Search bar card -->
+        <div class="glass-card search-card">
+          <h2>Check Your Loot Balance</h2>
+          <p>Enter your exact Albion Online In-Game Name to see your withdrawable silver and split history.</p>
+          <div class="search-box">
+            <input type="text" id="ign-search" placeholder="Type IGN (e.g. BLACK HEART)..." autocomplete="off">
+            <button id="search-btn">Search</button>
+            <div id="autocomplete-list" class="autocomplete-items"></div>
+          </div>
+          <div id="quick-links" class="quick-links">
+            <!-- Populated via Javascript -->
+          </div>
+        </div>
+
+        <!-- Player Dashboard (Hidden by default, shown when player matches) -->
+        <div id="player-profile" class="player-profile hidden">
+          <div class="profile-header">
+            <h2 id="profile-name">PLAYER PROFILE</h2>
+            <span class="badge" id="profile-status">Status</span>
+          </div>
+
+          <!-- Stats Grid -->
+          <div class="stats-grid">
+            <div class="stat-card withdrawable">
+              <span class="stat-icon">💵</span>
+              <div class="stat-info">
+                <h3>Withdrawable Balance</h3>
+                <p class="stat-value" id="val-withdrawable">0.000M</p>
+                <span class="stat-desc">Silver currently owed to you</span>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <span class="stat-icon">📈</span>
+              <div class="stat-info">
+                <h3>Starting Balance</h3>
+                <p class="stat-value" id="val-starting">0.000M</p>
+                <span class="stat-desc">Initial balance (Till 14/06)</span>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <span class="stat-icon">💸</span>
+              <div class="stat-info">
+                <h3>Fines & Withdrawals</h3>
+                <p class="stat-value" id="val-fines">0.000M</p>
+                <span class="stat-desc">Silver withdrawn or debited</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- History Timeline -->
+          <div class="glass-card timeline-card">
+            <h3>📊 Recent Session Splits & Details</h3>
+            <div class="timeline" id="session-timeline">
+              <!-- Populated via JS -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 2: LEADERBOARD -->
+      <section id="leaderboard-section" class="tab-content">
+        <div class="glass-card">
+          <div class="table-header">
+            <h2>Guild Loot Splits Directory</h2>
+            <div class="filter-controls">
+              <button class="filter-btn active" data-filter="all">All</button>
+              <button class="filter-btn" data-filter="positive">Withdrawable</button>
+              <button class="filter-btn" data-filter="negative">Owes Silver</button>
+            </div>
+          </div>
+          <div class="table-container">
+            <table class="leaderboard-table">
+              <thead>
+                <tr>
+                  <th>Player Name</th>
+                  <th>Current Balance (Withdrawable)</th>
+                  <th>Starting Balance</th>
+                  <th>Fines / Withdraws</th>
+                  <th>Participation</th>
+                </tr>
+              </thead>
+              <tbody id="leaderboard-body">
+                <!-- Populated via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 3: HELP & GUIDE -->
+      <section id="info-section" class="tab-content">
+        <div class="glass-card info-card">
+          <h2>Discord Bot Setup & Help</h2>
+          <p>The <strong>Split Tracker</strong> Discord bot helps guild members query their split balances from this spreadsheet directly from Discord.</p>
+          
+          <div class="guide-steps">
+            <div class="step">
+              <div class="step-num">1</div>
+              <div class="step-text">
+                <h3>Link Your Account</h3>
+                <p>Run the <code>/linkign &lt;your_ign&gt;</code> command in Discord. This maps your Discord ID to your Albion Online character name.</p>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-num">2</div>
+              <div class="step-text">
+                <h3>Check Your Balance</h3>
+                <p>Use the <code>/mysplit</code> command in Discord to instantly view your details or click the <strong>Refresh</strong> button to update them.</p>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-num">3</div>
+              <div class="step-text">
+                <h3>Receive Notifications</h3>
+                <p>Every time a split leader updates the spreadsheet, the bot automatically sends you a direct message (DM) showing your balance updates, split values, and formulas.</p>
+              </div>
+            </div>
+          </div>
+
+          <hr class="divider">
+
+          <h3>Useful Commands Reference</h3>
+          <div class="command-ref">
+            <p><code>/linkign [ign]</code> - Maps your account (Case-Insensitive).</p>
+            <p><code>/mysplit</code> - Shows your active silver balance.</p>
+            <p><code>/unlinkign</code> - Unlinks your Discord account.</p>
+            <p><code>/sync</code> (Admin Only) - Force-polls spreadsheet updates.</p>
+            <p><code>/viewsplits</code> (Admin Only) - View sorted balance directories.</p>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <p>Split Tracker Bot & Dashboard • Built for AFTERMATH Guild</p>
+      <p class="spread-link"><a href="https://docs.google.com/spreadsheets/d/1lXrXb3ek7ewkPhx2WHuKPaJzUHqSHo2Lahvr58fXdZ4/edit?usp=sharing" target="_blank">🔗 View Loot Split Google Sheet</a></p>
+    </footer>
+  </div>
+
+  <!-- JavaScript -->
+  <script src="/app.js"></script>
+</body>
+</html>

@@ -39,10 +39,10 @@ async function checkForUpdates(client) {
         const fineChanged = cached.fine !== player.fine;
 
         if (balanceChanged || totalChanged || fineChanged) {
-          const diff = player.balance - cached.balance;
+          const diff = player.total - cached.total;
           const diffStr = diff >= 0 ? `+${diff.toFixed(3)}M` : `${diff.toFixed(3)}M`;
 
-          console.log(`[Notifier] Detected change for player "${player.name}": Balance ${cached.balance}M -> ${player.balance}M (${diffStr})`);
+          console.log(`[Notifier] Detected change for player "${player.name}": Balance ${cached.total}M -> ${player.total}M (${diffStr})`);
 
           // Check if user is linked to a Discord ID
           const link = await db.getLinkByIgn(player.name);
@@ -60,14 +60,22 @@ async function checkForUpdates(client) {
                 .setDescription(`Your loot split balance for Albion IGN **${player.name}** has been updated in the spreadsheet.`)
                 .setColor('#d4af37') // Gold color
                 .addFields(
-                  { name: 'New Balance', value: `\`${player.balance.toFixed(3)}M\` Silver`, inline: true },
-                  { name: 'Previous Balance', value: `\`${cached.balance.toFixed(3)}M\` Silver`, inline: true },
+                  { name: 'Current Balance (Withdrawable)', value: `\`${player.total.toFixed(3)}M\` Silver`, inline: false },
+                  { name: 'Previous Balance', value: `\`${cached.total.toFixed(3)}M\` Silver`, inline: true },
                   { name: 'Difference', value: `\`${diffStr}\` Silver`, inline: true },
-                  { name: 'Total Payouts', value: `\`${player.total.toFixed(3)}M\` Silver`, inline: true },
+                  { name: 'Starting Balance (Till 14/06)', value: `\`${player.balance.toFixed(3)}M\` Silver`, inline: true },
                   { name: 'Fines / Withdraws', value: `\`${player.fine.toFixed(3)}M\` Silver`, inline: true }
-                )
-                .setTimestamp()
-                .setFooter({ text: 'Split Tracker • Use /mysplit to check anytime' });
+                );
+
+              if (player.sessions && player.sessions.length > 0) {
+                const sessionList = player.sessions.map(s => {
+                  const commentDetails = s.comments.length > 0 ? `\n   *Split details: ${s.comments.join(' | ')}*` : '';
+                  return `• **${s.sessionName}**: \`+${s.amount.toFixed(3)}M\` Silver${commentDetails}`;
+                }).join('\n');
+                dmEmbed.addFields({ name: '📊 Recent Session Splits & Details', value: sessionList, inline: false });
+              }
+
+              dmEmbed.setTimestamp().setFooter({ text: 'Split Tracker • Use /mysplit to check anytime' });
 
               await user.send({ embeds: [dmEmbed] });
               console.log(`[Notifier] Successfully sent balance update DM to ${user.tag} (${link.discord_id})`);
@@ -87,22 +95,30 @@ async function checkForUpdates(client) {
               if (link) {
                 channelEmbed.setDescription(
                   `💰 **Balance Update** for <@${link.discord_id}> (**${player.name}**)\n` +
-                  `• **Previous**: \`${cached.balance.toFixed(3)}M\`\n` +
-                  `• **New**: \`${player.balance.toFixed(3)}M\`\n` +
+                  `• **Previous**: \`${cached.total.toFixed(3)}M\`\n` +
+                  `• **New**: \`${player.total.toFixed(3)}M\`\n` +
                   `• **Change**: \`${diffStr}\``
                 );
-                await notificationChannel.send({ embeds: [channelEmbed] });
               } else {
                 // If not linked, alert the channel and prompt them to link
                 channelEmbed.setDescription(
                   `💰 **Balance Update** for **${player.name}**\n` +
-                  `• **Previous**: \`${cached.balance.toFixed(3)}M\`\n` +
-                  `• **New**: \`${player.balance.toFixed(3)}M\`\n` +
+                  `• **Previous**: \`${cached.total.toFixed(3)}M\`\n` +
+                  `• **New**: \`${player.total.toFixed(3)}M\`\n` +
                   `• **Change**: \`${diffStr}\`\n\n` +
                   `⚠️ *This player has not linked their Discord account. Use \`/linkign ${player.name}\` to link and receive direct balance notifications.*`
                 );
-                await notificationChannel.send({ embeds: [channelEmbed] });
               }
+
+              if (player.sessions && player.sessions.length > 0) {
+                const sessionList = player.sessions.map(s => {
+                  const commentDetails = s.comments.length > 0 ? ` *(${s.comments.join(' | ')})*` : '';
+                  return `• **${s.sessionName}**: \`+${s.amount.toFixed(3)}M\`${commentDetails}`;
+                }).join('\n');
+                channelEmbed.addFields({ name: 'Session Breakdown', value: sessionList, inline: false });
+              }
+
+              await notificationChannel.send({ embeds: [channelEmbed] });
             } catch (err) {
               console.error(`[Notifier] Failed to post update to notification channel:`, err.message);
             }
