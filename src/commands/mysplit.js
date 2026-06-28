@@ -2,51 +2,81 @@ const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, Butt
 const db = require('../database');
 const { fetchSheetData } = require('../sheets');
 const { detectIGN } = require('../utils');
+const config = require('../config');
 
 // Helper to construct the split embed
-function createSplitEmbed(ign, player) {
+function createSplitEmbed(ign, player1, player2) {
   const embed = new EmbedBuilder()
     .setTitle(`💰 Loot Split Balance`)
-    .setDescription(`Current loot split details for Albion IGN: **${ign}**`)
-    .setColor('#00bcd4') // Cyan theme
+    .setDescription(`Loot split details for Albion IGN: **${ign}**`)
+    .setColor('#00bcd4') // Default Cyan theme
     .setTimestamp()
     .setFooter({ text: 'Split Tracker • Updates automatically' });
 
-  if (player) {
-    embed.addFields(
-      { name: 'Current Balance (Withdrawable)', value: `\`${player.total.toFixed(3)}M\` Silver`, inline: false },
-      { name: 'Starting Balance (Till 14/06)', value: `\`${player.balance.toFixed(3)}M\` Silver`, inline: true },
-      { name: 'Fines / Withdraws', value: `\`${player.fine.toFixed(3)}M\` Silver`, inline: true }
-    );
+  if (player1 || player2) {
+    const total1 = player1 ? player1.total : 0;
+    const total2 = player2 ? player2.total : 0;
+    const combinedTotal = total1 + total2;
 
-    // Add session history splits and comments
-    if (player.sessions && player.sessions.length > 0) {
-      const sessionList = player.sessions.map(s => {
-        const commentDetails = s.comments.length > 0 ? `\n   *Split details: ${s.comments.join(' | ')}*` : '';
-        return `• **${s.sessionName}**: \`+${s.amount.toFixed(3)}M\` Silver${commentDetails}`;
-      }).join('\n');
+    embed.addFields({
+      name: 'Combined Withdrawable Balance',
+      value: `\`${combinedTotal.toFixed(3)}M\` Silver`,
+      inline: false
+    });
 
-      embed.addFields({ name: '📊 Recent Session Splits & Details', value: sessionList, inline: false });
+    // 1. JosephSteel Splits Field
+    if (player1) {
+      let details = `• **Current Balance**: \`${player1.total.toFixed(3)}M\` Silver\n` +
+                    `• Starting Balance: \`${player1.balance.toFixed(3)}M\`\n` +
+                    `• Fines / Withdraws: \`${player1.fine.toFixed(3)}M\``;
+      
+      if (player1.sessions && player1.sessions.length > 0) {
+        const list = player1.sessions.slice(0, 3).map(s => {
+          const comment = s.comments.length > 0 ? ` (*${s.comments.join(' | ')}*)` : '';
+          return `  - *${s.sessionName}*: \`+${s.amount.toFixed(3)}M\`${comment}`;
+        }).join('\n');
+        details += `\n**Recent Splits:**\n${list}`;
+      }
+      embed.addFields({ name: `⚔️ ${config.owner1}'s Splits`, value: details, inline: false });
     } else {
-      embed.addFields({ name: '📊 Recent Session Splits & Details', value: '*No recent sessions recorded on this sheet.*', inline: false });
+      embed.addFields({ name: `⚔️ ${config.owner1}'s Splits`, value: '*Not listed on this sheet.*', inline: false });
     }
 
-    // Add visual status indicator
-    if (player.total > 0.0001) {
-      embed.setDescription(`Current loot split details for Albion IGN: **${ign}**\n🟢 You have withdrawable silver! Contact an administrator to request a payout.`);
-    } else if (player.total < -0.0001) {
-      embed.setDescription(`Current loot split details for Albion IGN: **${ign}**\n🔴 You owe silver (fines/debts). Please pay an administrator.`);
-      embed.setColor('#f44336'); // Red for negative balance
+    // 2. King Splits Field
+    if (player2) {
+      let details = `• **Current Balance**: \`${player2.total.toFixed(3)}M\` Silver\n` +
+                    `• Starting Balance: \`${player2.balance.toFixed(3)}M\`\n` +
+                    `• Fines / Withdraws: \`${player2.fine.toFixed(3)}M\``;
+      
+      if (player2.sessions && player2.sessions.length > 0) {
+        const list = player2.sessions.slice(0, 3).map(s => {
+          const comment = s.comments.length > 0 ? ` (*${s.comments.join(' | ')}*)` : '';
+          return `  - *${s.sessionName}*: \`+${s.amount.toFixed(3)}M\`${comment}`;
+        }).join('\n');
+        details += `\n**Recent Splits:**\n${list}`;
+      }
+      embed.addFields({ name: `👑 ${config.owner2}'s Splits`, value: details, inline: false });
+    } else if (config.spreadsheetId2) {
+      embed.addFields({ name: `👑 ${config.owner2}'s Splits`, value: '*Not listed on this sheet.*', inline: false });
+    }
+
+    // Visual Color indicator
+    if (combinedTotal > 0.0001) {
+      embed.setDescription(`Loot split details for Albion IGN: **${ign}**\n🟢 You have withdrawable silver! Request payouts from sheet admins.`);
+      embed.setColor('#4caf50'); // Green
+    } else if (combinedTotal < -0.0001) {
+      embed.setDescription(`Loot split details for Albion IGN: **${ign}**\n🔴 You owe silver (outstanding fine/debt). Please pay sheet admins.`);
+      embed.setColor('#f44336'); // Red
     } else {
-      embed.setDescription(`Current loot split details for Albion IGN: **${ign}**\n⚪ Your balance is fully settled.`);
+      embed.setDescription(`Loot split details for Albion IGN: **${ign}**\n⚪ Your balances are settled.`);
     }
   } else {
-    embed.setTitle('⚠️ IGN Not Found in Sheet')
+    embed.setTitle('⚠️ IGN Not Found in Sheets')
       .setDescription(
-        `Your Discord account is linked to **${ign}**, but this name was not found in the spreadsheet.\n\n` +
-        `• Please check if you spelt your IGN correctly.\n` +
-        `• If you are new, wait for an admin to add your IGN to the sheet.\n` +
-        `• You can re-run \`/linkign <correct_ign>\` to link a different name.`
+        `Your Discord account is linked to **${ign}**, but this name was not found in either the **${config.owner1}** or **${config.owner2}** spreadsheets.\n\n` +
+        `• Please check your spelling.\n` +
+        `• If you are new, wait for admins to add your IGN to one of the sheets.\n` +
+        `• You can run \`/linkign <correct_ign>\` to relink.`
       )
       .setColor('#ff9800');
   }
@@ -58,6 +88,9 @@ module.exports = {
   data: new SlashCommandBuilder()
     .setName('mysplit')
     .setDescription('View your current loot split balance'),
+  
+  createSplitEmbed, // Export for refresh interactions and notifier
+
   async execute(interaction) {
     await interaction.deferReply();
 
@@ -66,13 +99,22 @@ module.exports = {
     let autoSyncMessage = null;
 
     try {
-      // Fetch latest sheet data
-      const players = await fetchSheetData();
+      // Fetch both spreadsheets
+      const players1 = await fetchSheetData(config.spreadsheetId);
+      let players2 = [];
+      if (config.spreadsheetId2) {
+        try {
+          players2 = await fetchSheetData(config.spreadsheetId2);
+        } catch (err) {
+          console.error('[mysplit] Failed to fetch sheet 2:', err.message);
+        }
+      }
 
-      // Auto-detect IGN from Discord Display Name if not linked
+      // Auto-detect IGN from Discord nickname across both sheets if not linked
       if (!link) {
         const displayName = interaction.member?.displayName || interaction.user.username;
-        const detectedIgn = detectIGN(displayName, players);
+        const allPlayers = [...players1, ...players2];
+        const detectedIgn = detectIGN(displayName, allPlayers);
 
         if (detectedIgn) {
           await db.linkUser(discordId, detectedIgn);
@@ -85,14 +127,19 @@ module.exports = {
         }
       }
 
-      const matchedPlayer = players.find(p => p.name.toLowerCase() === link.ign.toLowerCase());
+      // Find player splits on both sheets
+      const matchedPlayer1 = players1.find(p => p.name.toLowerCase() === link.ign.toLowerCase());
+      const matchedPlayer2 = players2.find(p => p.name.toLowerCase() === link.ign.toLowerCase());
 
-      // If player found, update local cache
-      if (matchedPlayer) {
-        await db.updateCachedBalance(matchedPlayer.name, matchedPlayer.balance, matchedPlayer.total, matchedPlayer.fine);
+      // Update local db cache
+      if (matchedPlayer1) {
+        await db.updateCachedBalance(matchedPlayer1.name, config.owner1, matchedPlayer1.balance, matchedPlayer1.total, matchedPlayer1.fine);
+      }
+      if (matchedPlayer2) {
+        await db.updateCachedBalance(matchedPlayer2.name, config.owner2, matchedPlayer2.balance, matchedPlayer2.total, matchedPlayer2.fine);
       }
 
-      const embed = createSplitEmbed(link.ign, matchedPlayer);
+      const embed = createSplitEmbed(link.ign, matchedPlayer1, matchedPlayer2);
 
       // Create interactive Refresh button
       const refreshBtn = new ButtonBuilder()
@@ -112,11 +159,8 @@ module.exports = {
     } catch (err) {
       console.error('Error in mysplit command:', err);
       return await interaction.editReply({
-        content: '❌ Failed to fetch your split balance. The spreadsheet might be temporarily unavailable.',
+        content: '❌ Failed to fetch your split balance. The spreadsheets might be temporarily unavailable.',
       });
     }
   },
-  
-  // Expose embed builder and handler for button interactions
-  createSplitEmbed,
 };

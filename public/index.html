@@ -61,46 +61,75 @@
 
         <!-- Player Dashboard (Hidden by default, shown when player matches) -->
         <div id="player-profile" class="player-profile hidden">
-          <div class="profile-header">
+          <div class="profile-header" style="flex-wrap: wrap; gap: 1rem;">
             <h2 id="profile-name">PLAYER PROFILE</h2>
             <span class="badge" id="profile-status">Status</span>
+            <div class="combined-total-banner">Combined Withdrawable: <span id="combined-total-value">0.000M</span> Silver</div>
           </div>
 
-          <!-- Stats Grid -->
-          <div class="stats-grid">
-            <div class="stat-card withdrawable">
-              <span class="stat-icon">💵</span>
-              <div class="stat-info">
-                <h3>Withdrawable Balance</h3>
-                <p class="stat-value" id="val-withdrawable">0.000M</p>
-                <span class="stat-desc">Silver currently owed to you</span>
+          <div class="profile-columns">
+            <!-- COLUMN 1: JosephSteel's Splits -->
+            <div class="profile-column" id="col-owner1">
+              <h3 class="col-title" id="title-owner1">⚔️ JosephSteel's Splits</h3>
+              <div class="stats-grid mini">
+                <div class="stat-card withdrawable mini">
+                  <div class="stat-info">
+                    <h3>Withdrawable</h3>
+                    <p class="stat-value" id="o1-withdrawable">0.000M</p>
+                  </div>
+                </div>
+                <div class="stat-card mini">
+                  <div class="stat-info">
+                    <h3>Starting</h3>
+                    <p class="stat-value" id="o1-starting">0.000M</p>
+                  </div>
+                </div>
+                <div class="stat-card mini">
+                  <div class="stat-info">
+                    <h3>Fines</h3>
+                    <p class="stat-value" id="o1-fines">0.000M</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="glass-card timeline-card mini-timeline" style="margin-top: 1rem; padding: 1.2rem;">
+                <h4>Recent Session Splits</h4>
+                <div class="timeline" id="o1-timeline">
+                  <!-- Populated via JS -->
+                </div>
               </div>
             </div>
 
-            <div class="stat-card">
-              <span class="stat-icon">📈</span>
-              <div class="stat-info">
-                <h3>Starting Balance</h3>
-                <p class="stat-value" id="val-starting">0.000M</p>
-                <span class="stat-desc">Initial balance (Till 14/06)</span>
+            <!-- COLUMN 2: King's Splits -->
+            <div class="profile-column" id="col-owner2">
+              <h3 class="col-title" id="title-owner2">👑 King's Splits</h3>
+              <div class="stats-grid mini">
+                <div class="stat-card withdrawable mini">
+                  <div class="stat-info">
+                    <h3>Withdrawable</h3>
+                    <p class="stat-value" id="o2-withdrawable">0.000M</p>
+                  </div>
+                </div>
+                <div class="stat-card mini">
+                  <div class="stat-info">
+                    <h3>Starting</h3>
+                    <p class="stat-value" id="o2-starting">0.000M</p>
+                  </div>
+                </div>
+                <div class="stat-card mini">
+                  <div class="stat-info">
+                    <h3>Fines</h3>
+                    <p class="stat-value" id="o2-fines">0.000M</p>
+                  </div>
+                </div>
               </div>
-            </div>
-
-            <div class="stat-card">
-              <span class="stat-icon">💸</span>
-              <div class="stat-info">
-                <h3>Fines & Withdrawals</h3>
-                <p class="stat-value" id="val-fines">0.000M</p>
-                <span class="stat-desc">Silver withdrawn or debited</span>
+              
+              <div class="glass-card timeline-card mini-timeline" style="margin-top: 1rem; padding: 1.2rem;">
+                <h4>Recent Session Splits</h4>
+                <div class="timeline" id="o2-timeline">
+                  <!-- Populated via JS -->
+                </div>
               </div>
-            </div>
-          </div>
-
-          <!-- History Timeline -->
-          <div class="glass-card timeline-card">
-            <h3>📊 Recent Session Splits & Details</h3>
-            <div class="timeline" id="session-timeline">
-              <!-- Populated via JS -->
             </div>
           </div>
         </div>
@@ -110,7 +139,10 @@
       <section id="leaderboard-section" class="tab-content">
         <div class="glass-card">
           <div class="table-header">
-            <h2>Guild Loot Splits Directory</h2>
+            <div>
+              <h2>Guild Loot Splits Directory</h2>
+              <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 0.4rem;">Displays withdrawable splits across both sheets side-by-side.</p>
+            </div>
             <div class="filter-controls">
               <button class="filter-btn active" data-filter="all">All</button>
               <button class="filter-btn" data-filter="positive">Withdrawable</button>
@@ -208,7 +240,7 @@
     <!-- Footer -->
     <footer class="app-footer">
       <p>Split Tracker Bot & Dashboard • Built for AFTERMATH Guild</p>
-      <p class="spread-link"><a href="https://docs.google.com/spreadsheets/d/1lXrXb3ek7ewkPhx2WHuKPaJzUHqSHo2Lahvr58fXdZ4/edit?usp=sharing" target="_blank">🔗 View Loot Split Google Sheet</a></p>
+      <p class="spread-link" id="footer-sheet-links"></p>
     </footer>
   </div>
 

@@ -35,12 +35,13 @@ function parseCSV(csvText) {
 /**
  * Fetches sheet data and parses player balances, including session-specific splits and comments.
  */
-async function fetchSheetData() {
-  if (!config.spreadsheetId) {
+async function fetchSheetData(customId) {
+  const targetId = customId || config.spreadsheetId;
+  if (!targetId) {
     throw new Error('Spreadsheet ID is not configured.');
   }
 
-  const exportUrl = `https://docs.google.com/spreadsheets/d/${config.spreadsheetId}/export?format=csv`;
+  const exportUrl = `https://docs.google.com/spreadsheets/d/${targetId}/export?format=csv`;
   
   try {
     const response = await axios.get(exportUrl, {
@@ -57,10 +58,10 @@ async function fetchSheetData() {
 
     const parsedRows = parseCSV(csvData);
     
-    // Find header row starting with "NAMES"
-    const headers = parsedRows.find(row => row[0] && row[0].toUpperCase() === 'NAMES');
+    // Find header row starting with "NAMES" or "NAME"
+    const headers = parsedRows.find(row => row[0] && (row[0].toUpperCase() === 'NAMES' || row[0].toUpperCase() === 'NAME'));
     if (!headers) {
-      throw new Error('Could not find header row starting with "NAMES" in spreadsheet.');
+      throw new Error('Could not find header row starting with "NAMES" or "NAME" in spreadsheet.');
     }
     const headerIndex = parsedRows.indexOf(headers);
 
@@ -70,7 +71,7 @@ async function fetchSheetData() {
       const name = row[0];
       if (!name) return false;
       const norm = name.toUpperCase();
-      if (norm === 'TOTAL' || norm.includes('TILL') || norm.includes('WITHDRAWABLE')) return false;
+      if (norm === 'TOTAL' || norm.includes('TILL') || norm.includes('WITHDRAWABLE') || norm.includes('TOTALS')) return false;
       return true;
     });
 
@@ -78,10 +79,22 @@ async function fetchSheetData() {
       throw new Error('Could not find player data rows in spreadsheet.');
     }
 
-    // Extract comments/formulas for session columns (index 4 and onwards)
-    // We look at all metadata rows between headerIndex + 1 and firstPlayerIndex - 1
+    // Identify Column Indices dynamically
+    const totalIndex = headers.findIndex(h => h && h.toUpperCase().trim() === 'TOTAL');
+    const balanceIndex = headers.findIndex(h => h && (h.toUpperCase().includes('BALANCE') || h.toUpperCase().includes('PREVIOUS')));
+    const fineIndex = headers.findIndex(h => h && (h.toUpperCase().includes('FINE') || h.toUpperCase().includes('WITHDRAW')));
+
+    // Session columns are columns that are NOT name, total, balance, or fine
+    const sessionColIndices = [];
+    for (let j = 1; j < headers.length; j++) {
+      if (j === totalIndex || j === balanceIndex || j === fineIndex) continue;
+      if (!headers[j] || headers[j].toLowerCase().includes('total')) continue;
+      sessionColIndices.push(j);
+    }
+
+    // Extract comments/formulas for session columns
     const sessionMeta = {};
-    for (let j = 4; j < headers.length; j++) {
+    for (const j of sessionColIndices) {
       const colHeader = headers[j];
       const comments = [];
       for (let r = headerIndex + 1; r < firstPlayerIndex; r++) {
@@ -104,24 +117,18 @@ async function fetchSheetData() {
       if (!name) continue;
 
       const normalizedName = name.toUpperCase();
-      if (normalizedName === 'TOTAL') continue; // Skip totals row at the bottom
+      if (normalizedName === 'TOTAL' || normalizedName === 'TOTALS') continue; // Skip totals row at the bottom
 
-      // Columns layout (0-indexed):
-      // 0: NAMES
-      // 1: FINE/ WITHDRAWS
-      // 2: TOTAL (Current Active Balance)
-      // 3: BALANCE (Starting Balance)
-      const fineVal = row[1] ? parseFloat(row[1].replace(/,/g, '')) : 0;
-      const totalVal = row[2] ? parseFloat(row[2].replace(/,/g, '')) : 0;
-      const balanceVal = row[3] ? parseFloat(row[3].replace(/,/g, '')) : 0;
+      const fineVal = fineIndex !== -1 && row[fineIndex] ? parseFloat(row[fineIndex].replace(/,/g, '')) : 0;
+      const totalVal = totalIndex !== -1 && row[totalIndex] ? parseFloat(row[totalIndex].replace(/,/g, '')) : 0;
+      const balanceVal = balanceIndex !== -1 && row[balanceIndex] ? parseFloat(row[balanceIndex].replace(/,/g, '')) : 0;
 
       // Extract session splits
       const playerSessions = [];
-      for (let j = 4; j < row.length; j++) {
+      for (const j of sessionColIndices) {
         const valStr = row[j]?.trim();
         if (valStr) {
           const val = parseFloat(valStr.replace(/,/g, ''));
-          // Keep splits (even if 0, but usually if blank they didn't participate)
           if (!isNaN(val) && val !== 0) {
             playerSessions.push({
               sessionName: headers[j],

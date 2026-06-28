@@ -1,6 +1,9 @@
 // State Management
-let playersData = [];
-let selectedPlayerName = null;
+let sheet1Data = [];
+let sheet2Data = [];
+let owner1Name = 'JosephSteel';
+let owner2Name = 'King';
+let activeStandingsSheet = 'sheet1'; // 'sheet1' or 'sheet2'
 
 // DOM Elements
 const elements = {
@@ -12,14 +15,11 @@ const elements = {
   playerProfile: document.getElementById('player-profile'),
   profileName: document.getElementById('profile-name'),
   profileStatus: document.getElementById('profile-status'),
-  valWithdrawable: document.getElementById('val-withdrawable'),
-  valStarting: document.getElementById('val-starting'),
-  valFines: document.getElementById('val-fines'),
-  sessionTimeline: document.getElementById('session-timeline'),
+  combinedTotalValue: document.getElementById('combined-total-value'),
   leaderboardBody: document.getElementById('leaderboard-body'),
   quickLinks: document.getElementById('quick-links'),
   tabs: document.querySelectorAll('.tab-btn'),
-  filterBtns: document.querySelectorAll('.filter-btn'),
+  filterBtns: document.querySelectorAll('.filter-controls .filter-btn'),
   linksBody: document.getElementById('links-body')
 };
 
@@ -32,7 +32,7 @@ async function init() {
   // 1. Fetch Bot status
   checkBotStatus();
   
-  // 2. Fetch Spreadsheet data
+  // 2. Fetch Spreadsheets data
   await loadSpreadsheetData();
 
   // 3. Render sample quick links
@@ -67,16 +67,37 @@ async function checkBotStatus() {
   }
 }
 
-// 📋 Fetch sheet splits
+// 📋 Fetch sheets splits
 async function loadSpreadsheetData() {
   try {
     const res = await fetch('/api/splits');
     if (!res.ok) throw new Error('API server returned error');
     
     const data = await res.json();
-    if (data.success && data.players) {
-      playersData = data.players;
-      console.log(`Loaded ${playersData.length} player splits.`);
+    if (data.success) {
+      sheet1Data = data.josephsteel || [];
+      sheet2Data = data.king || [];
+      owner1Name = data.owner1 || 'JosephSteel';
+      owner2Name = data.owner2 || 'King';
+      
+      // Update HTML labels dynamically
+      document.getElementById('title-owner1').textContent = `⚔️ ${owner1Name}'s Splits`;
+      document.getElementById('title-owner2').textContent = `👑 ${owner2Name}'s Splits`;
+      elements.btnToggleSheet1.textContent = `${owner1Name}'s Splits`;
+      elements.btnToggleSheet2.textContent = `${owner2Name}'s Splits`;
+
+      // Render footer links
+      const linksContainer = document.getElementById('footer-sheet-links');
+      if (linksContainer) {
+        let linksHTML = `<a href="${data.url1}" target="_blank">🔗 View ${owner1Name}'s Loot Sheet</a>`;
+        if (data.url2) {
+          linksHTML += ` | <a href="${data.url2}" target="_blank">🔗 View ${owner2Name}'s Loot Sheet</a>`;
+        }
+        linksContainer.innerHTML = linksHTML;
+      }
+
+      console.log(`Loaded ${sheet1Data.length} players from ${owner1Name} sheet.`);
+      console.log(`Loaded ${sheet2Data.length} players from ${owner2Name} sheet.`);
       
       // Render Leaderboard initially
       renderLeaderboard('all');
@@ -86,7 +107,7 @@ async function loadSpreadsheetData() {
     elements.leaderboardBody.innerHTML = `
       <tr>
         <td colspan="5" style="text-align: center; color: var(--red);">
-          ❌ Error: Failed to fetch spreadsheet data. Ensure your server is running and .env is configured.
+          ❌ Error: Failed to fetch spreadsheets data. Ensure your server is running and .env is configured.
         </td>
       </tr>
     `;
@@ -98,88 +119,102 @@ function performSearch(query) {
   const cleanQuery = query.trim().toLowerCase();
   if (!cleanQuery) return;
 
-  const player = playersData.find(p => p.name.toLowerCase() === cleanQuery);
+  const player1 = sheet1Data.find(p => p.name.toLowerCase() === cleanQuery);
+  const player2 = sheet2Data.find(p => p.name.toLowerCase() === cleanQuery);
   elements.autocompleteList.innerHTML = ''; // Clear suggestions
 
-  if (player) {
-    showPlayerProfile(player);
+  if (player1 || player2) {
+    showPlayerProfile(player1, player2, query);
   } else {
     // Show not found state
     elements.playerProfile.classList.remove('hidden');
     elements.profileName.textContent = `IGN "${query}" not found`;
     elements.profileStatus.className = 'badge debt';
     elements.profileStatus.textContent = 'Unverified';
-    elements.valWithdrawable.textContent = '---';
-    elements.valStarting.textContent = '---';
-    elements.valFines.textContent = '---';
-    elements.sessionTimeline.innerHTML = '<p style="color: var(--text-secondary);">Spelt correctly? Check if your name is spelled exactly as listed in the Google Sheet.</p>';
+    elements.combinedTotalValue.textContent = '0.000M';
+
+    // Show blank columns
+    document.getElementById('o1-withdrawable').textContent = '---';
+    document.getElementById('o1-starting').textContent = '---';
+    document.getElementById('o1-fines').textContent = '---';
+    document.getElementById('o1-timeline').innerHTML = '<p style="color: var(--text-secondary);">Spelt correctly? Check if your name is listed on either sheet.</p>';
+
+    document.getElementById('o2-withdrawable').textContent = '---';
+    document.getElementById('o2-starting').textContent = '---';
+    document.getElementById('o2-fines').textContent = '---';
+    document.getElementById('o2-timeline').innerHTML = '<p style="color: var(--text-secondary);">Spelt correctly? Check if your name is listed on either sheet.</p>';
     
     // Smooth scroll down
     elements.playerProfile.scrollIntoView({ behavior: 'smooth' });
   }
 }
 
-// Render dynamic profile panel
-function showPlayerProfile(player) {
+// Render dynamic profile panel for both sheets
+function showPlayerProfile(player1, player2, query) {
   elements.playerProfile.classList.remove('hidden');
-  elements.profileName.textContent = player.name;
-  
-  // Set badge style
-  const activeBal = player.total;
-  elements.valWithdrawable.textContent = `${activeBal.toFixed(3)}M`;
-  elements.valStarting.textContent = `${player.balance.toFixed(3)}M`;
-  elements.valFines.textContent = `${player.fine.toFixed(3)}M`;
+  const resolvedName = player1 ? player1.name : (player2 ? player2.name : query);
+  elements.profileName.textContent = resolvedName;
 
-  // Set card classes for conditional styles
-  const withdrawableCard = document.querySelector('.stat-card.withdrawable');
-  withdrawableCard.className = 'stat-card withdrawable'; // reset
+  const total1 = player1 ? player1.total : 0;
+  const total2 = player2 ? player2.total : 0;
+  const combinedTotal = total1 + total2;
 
-  if (activeBal > 0.0001) {
+  elements.combinedTotalValue.textContent = `${combinedTotal.toFixed(3)}M`;
+
+  // Combined status badge
+  if (combinedTotal > 0.0001) {
     elements.profileStatus.className = 'badge withdrawable';
     elements.profileStatus.textContent = '🟢 Withdrawable';
-  } else if (activeBal < -0.0001) {
+  } else if (combinedTotal < -0.0001) {
     elements.profileStatus.className = 'badge debt';
     elements.profileStatus.textContent = '🔴 Owes Silver';
-    withdrawableCard.classList.add('debt');
   } else {
     elements.profileStatus.className = 'badge settled';
     elements.profileStatus.textContent = '⚪ Settled';
   }
 
-  // Populate Timeline
-  elements.sessionTimeline.innerHTML = '';
-  if (player.sessions && player.sessions.length > 0) {
-    player.sessions.forEach(s => {
-      const item = document.createElement('div');
-      item.className = 'timeline-item';
-      
-      const dot = document.createElement('div');
-      dot.className = 'timeline-dot';
-      
-      const content = document.createElement('div');
-      content.className = 'timeline-content';
-      
-      const info = document.createElement('div');
-      info.innerHTML = `
-        <div class="session-name">${s.sessionName}</div>
-        ${s.comments.length > 0 ? `<div class="session-details">Formula: ${s.comments.join(' | ')}</div>` : ''}
-      `;
-      
-      const val = document.createElement('div');
-      val.className = `session-amount ${s.amount < 0 ? 'negative-val' : ''}`;
-      val.textContent = `${s.amount >= 0 ? '+' : ''}${s.amount.toFixed(3)}M`;
-      if (s.amount < 0) {
-        val.style.color = 'var(--red)';
-      }
-      
-      content.appendChild(info);
-      content.appendChild(val);
-      item.appendChild(dot);
-      item.appendChild(content);
-      elements.sessionTimeline.appendChild(item);
-    });
+  // Render Owner 1 details
+  if (player1) {
+    document.getElementById('o1-withdrawable').textContent = `${player1.total.toFixed(3)}M`;
+    document.getElementById('o1-starting').textContent = `${player1.balance.toFixed(3)}M`;
+    document.getElementById('o1-fines').textContent = `${player1.fine.toFixed(3)}M`;
+
+    const timelineContainer = document.getElementById('o1-timeline');
+    timelineContainer.innerHTML = '';
+    if (player1.sessions && player1.sessions.length > 0) {
+      player1.sessions.forEach(s => {
+        timelineContainer.innerHTML += createTimelineItemHTML(s);
+      });
+    } else {
+      timelineContainer.innerHTML = '<p style="color: var(--text-secondary); font-style: italic; font-size: 0.85rem;">No recent sessions found on this sheet.</p>';
+    }
   } else {
-    elements.sessionTimeline.innerHTML = '<p style="color: var(--text-secondary); font-style: italic;">No recent sessions found for this player.</p>';
+    document.getElementById('o1-withdrawable').textContent = '0.000M';
+    document.getElementById('o1-starting').textContent = '0.000M';
+    document.getElementById('o1-fines').textContent = '0.000M';
+    document.getElementById('o1-timeline').innerHTML = `<p style="color: var(--text-secondary); font-style: italic; font-size: 0.85rem;">Not listed on ${owner1Name}'s splits.</p>`;
+  }
+
+  // Render Owner 2 details
+  if (player2) {
+    document.getElementById('o2-withdrawable').textContent = `${player2.total.toFixed(3)}M`;
+    document.getElementById('o2-starting').textContent = `${player2.balance.toFixed(3)}M`;
+    document.getElementById('o2-fines').textContent = `${player2.fine.toFixed(3)}M`;
+
+    const timelineContainer = document.getElementById('o2-timeline');
+    timelineContainer.innerHTML = '';
+    if (player2.sessions && player2.sessions.length > 0) {
+      player2.sessions.forEach(s => {
+        timelineContainer.innerHTML += createTimelineItemHTML(s);
+      });
+    } else {
+      timelineContainer.innerHTML = '<p style="color: var(--text-secondary); font-style: italic; font-size: 0.85rem;">No recent sessions found on this sheet.</p>';
+    }
+  } else {
+    document.getElementById('o2-withdrawable').textContent = '0.000M';
+    document.getElementById('o2-starting').textContent = '0.000M';
+    document.getElementById('o2-fines').textContent = '0.000M';
+    document.getElementById('o2-timeline').innerHTML = `<p style="color: var(--text-secondary); font-style: italic; font-size: 0.85rem;">Not listed on ${owner2Name}'s splits.</p>`;
   }
 
   // Smooth scroll
@@ -188,15 +223,35 @@ function showPlayerProfile(player) {
   }, 100);
 }
 
-// 📋 Render standings list
+// Timeline item structure builder
+function createTimelineItemHTML(s) {
+  const details = s.comments.length > 0 ? `<div class="session-details">Formula: ${s.comments.join(' | ')}</div>` : '';
+  return `
+    <div class="timeline-item">
+      <div class="timeline-dot"></div>
+      <div class="timeline-content" style="padding: 0.8rem 1rem;">
+        <div>
+          <div class="session-name" style="font-size: 0.85rem;">${s.sessionName}</div>
+          ${details}
+        </div>
+        <div class="session-amount" style="font-size: 0.95rem; color: ${s.amount < 0 ? 'var(--red)' : 'var(--green)'};">
+          ${s.amount >= 0 ? '+' : ''}${s.amount.toFixed(3)}M
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// 📋 Render standings list for JosephSteel (Sheet 1) only
 function renderLeaderboard(filter) {
   elements.leaderboardBody.innerHTML = '';
 
-  let filtered = [...playersData];
+  let filtered = [...sheet1Data];
+
   if (filter === 'positive') {
-    filtered = playersData.filter(p => p.total > 0.0001);
+    filtered = sheet1Data.filter(p => p.total > 0.0001);
   } else if (filter === 'negative') {
-    filtered = playersData.filter(p => p.total < -0.0001);
+    filtered = sheet1Data.filter(p => p.total < -0.0001);
   }
 
   // Sort by withdrawable balance descending
@@ -216,12 +271,10 @@ function renderLeaderboard(filter) {
   filtered.forEach(p => {
     const row = document.createElement('tr');
     
-    // Make name clickable
     const nameCell = document.createElement('td');
     nameCell.className = 'player-name-cell';
     nameCell.textContent = p.name;
     nameCell.addEventListener('click', () => {
-      // Switch tab to search
       switchTab('search-section');
       elements.ignInput.value = p.name;
       performSearch(p.name);
@@ -244,7 +297,6 @@ function renderLeaderboard(filter) {
       <td>${p.sessions ? p.sessions.length : 0} Sessions</td>
     `;
     
-    // Add event listener to the name cell again (innerHTML overwrote nodes, let's just insert elements cleanly)
     row.replaceChild(nameCell, row.firstChild);
     row.replaceChild(activeBalCell, row.children[1]);
 
@@ -299,6 +351,8 @@ function setupFilters() {
   });
 }
 
+// Standings switcher was removed in favor of side-by-side combined table.
+
 // 🔍 Search Autocomplete engine
 function setupAutocomplete() {
   elements.ignInput.addEventListener('input', function() {
@@ -307,22 +361,27 @@ function setupAutocomplete() {
     
     if (!val) return;
 
+    // Union unique names across both sheets
+    const allNames = [...new Set([
+      ...sheet1Data.map(p => p.name),
+      ...sheet2Data.map(p => p.name)
+    ])];
+
     // Filter players that start with query or contain query
-    const matches = playersData.filter(p => p.name.toLowerCase().includes(val)).slice(0, 5);
+    const matches = allNames.filter(name => name.toLowerCase().includes(val)).slice(0, 5);
     
-    matches.forEach(p => {
+    matches.forEach(name => {
       const item = document.createElement('div');
-      // Highlight matching letters
-      const idx = p.name.toLowerCase().indexOf(val);
-      const highlightedName = p.name.substring(0, idx) + 
-                              `<strong>${p.name.substring(idx, idx + val.length)}</strong>` + 
-                              p.name.substring(idx + val.length);
+      const idx = name.toLowerCase().indexOf(val);
+      const highlightedName = name.substring(0, idx) + 
+                              `<strong>${name.substring(idx, idx + val.length)}</strong>` + 
+                              name.substring(idx + val.length);
       
       item.innerHTML = highlightedName;
       item.addEventListener('click', () => {
-        elements.ignInput.value = p.name;
+        elements.ignInput.value = name;
         elements.autocompleteList.innerHTML = '';
-        performSearch(p.name);
+        performSearch(name);
       });
       elements.autocompleteList.appendChild(item);
     });
@@ -403,7 +462,6 @@ async function loadDatabaseLinks() {
           <td style="font-family: monospace; font-size: 0.85rem; color: var(--text-secondary);">${link.discord_id}</td>
         `;
 
-        // Put back the clickable IGN cell node
         row.replaceChild(ignCell, row.firstChild);
         elements.linksBody.appendChild(row);
       });

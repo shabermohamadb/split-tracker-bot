@@ -728,3 +728,98 @@ body {
     padding: 0.8rem 0;
   }
 }
+
+/* Profile Columns side-by-side */
+.profile-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  margin-top: 1.5rem;
+}
+
+@media (max-width: 900px) {
+  .profile-columns {
+    grid-template-columns: 1fr;
+  }
+}
+
+.profile-column {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.col-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.6rem;
+  color: var(--gold);
+  letter-spacing: 0.5px;
+}
+
+#col-owner2 .col-title {
+  color: #ffc107;
+}
+
+.stats-grid.mini {
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.6rem;
+  margin-bottom: 0;
+}
+
+@media (max-width: 600px) {
+  .stats-grid.mini {
+    grid-template-columns: 1fr;
+  }
+}
+
+.stat-card.mini {
+  padding: 0.8rem 0.6rem;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.2rem;
+}
+
+.stat-card.mini .stat-info h3 {
+  font-size: 0.7rem;
+  margin-bottom: 0.1rem;
+}
+
+.stat-card.mini .stat-value {
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.mini-timeline h4 {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  margin-bottom: 0.8rem;
+  letter-spacing: 0.5px;
+}
+
+.combined-total-banner {
+  background: rgba(212, 175, 55, 0.08);
+  border: 1px solid var(--gold);
+  padding: 0.5rem 1.2rem;
+  border-radius: 50px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--gold);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+#combined-total-value {
+  color: #fff;
+  font-weight: 800;
+  font-size: 0.95rem;
+  text-shadow: 0 0 8px var(--gold-glow);
+}

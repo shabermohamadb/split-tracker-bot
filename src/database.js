@@ -46,22 +46,71 @@ async function initDb() {
       // Connect to pool to check connection
       await pool.query('SELECT NOW()');
       
-      // Create PostgreSQL tables
+      // Create user_links table
       await pool.query(`
         CREATE TABLE IF NOT EXISTS user_links (
           discord_id TEXT PRIMARY KEY,
           ign TEXT UNIQUE,
           linked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
+      `);
 
+      // Migration: Add sheet_owner and composite primary key if they don't exist
+      try {
+        // Add sheet_owner column
+        await pool.query(`
+          ALTER TABLE balances ADD COLUMN IF NOT EXISTS sheet_owner TEXT DEFAULT 'JosephSteel';
+        `);
+
+        // Query the database to find the actual primary key constraint name on the balances table
+        const pkeyRes = await pool.query(`
+          SELECT conname 
+          FROM pg_constraint 
+          WHERE conrelid = 'balances'::regclass AND contype = 'p';
+        `);
+
+        if (pkeyRes.rows.length > 0) {
+          const conName = pkeyRes.rows[0].conname;
+          
+          // Verify if the current primary key column set contains sheet_owner
+          const checkKeyRes = await pool.query(`
+            SELECT a.attname
+            FROM pg_index i
+            JOIN pg_attribute a ON a.attrelid = i.indrelid AND a.attnum = ANY(i.indkey)
+            WHERE i.indrelid = 'balances'::regclass AND i.indisprimary = true;
+          `);
+          
+          const keyCols = checkKeyRes.rows.map(r => r.attname);
+          if (!keyCols.includes('sheet_owner')) {
+            console.log(`[Database] Migrating primary key constraint "${conName}" to composite key (ign, sheet_owner)...`);
+            await pool.query(`
+              ALTER TABLE balances DROP CONSTRAINT ${conName};
+              ALTER TABLE balances ADD PRIMARY KEY (ign, sheet_owner);
+            `);
+          }
+        } else {
+          // Add primary key if none exists
+          await pool.query(`
+            ALTER TABLE balances ADD PRIMARY KEY (ign, sheet_owner);
+          `);
+        }
+      } catch (migrationErr) {
+        // Table might not exist yet; will be created in the next step
+      }
+
+      // Create balances table if not exists
+      await pool.query(`
         CREATE TABLE IF NOT EXISTS balances (
-          ign TEXT PRIMARY KEY,
+          ign TEXT,
+          sheet_owner TEXT DEFAULT 'JosephSteel',
           balance DOUBLE PRECISION,
           total DOUBLE PRECISION,
           fine DOUBLE PRECISION,
-          last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+          last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          PRIMARY KEY (ign, sheet_owner)
         );
       `);
+      
       console.log('[Database] PostgreSQL tables initialized successfully.');
     } catch (err) {
       console.error('[Database] PostgreSQL connection failed. Falling back to local JSON file db.', err.message);
@@ -84,6 +133,29 @@ function initJsonDb() {
       dbData = JSON.parse(content);
       dbData.user_links = dbData.user_links || {};
       dbData.balances = dbData.balances || {};
+
+      // Migrate old schema (balances keyed purely by ign)
+      let migrated = false;
+      for (const key of Object.keys(dbData.balances)) {
+        if (!key.includes('_')) {
+          const oldRecord = dbData.balances[key];
+          const newKey = `${key}_josephsteel`;
+          dbData.balances[newKey] = {
+            ign: oldRecord.ign,
+            sheet_owner: 'JosephSteel',
+            balance: oldRecord.balance,
+            total: oldRecord.total,
+            fine: oldRecord.fine,
+            last_updated: oldRecord.last_updated || new Date().toISOString()
+          };
+          delete dbData.balances[key];
+          migrated = true;
+        }
+      }
+      if (migrated) {
+        saveDbJson();
+        console.log('[Database] Migrated local JSON cache to multi-sheet schema.');
+      }
     } catch (err) {
       console.error('[Database] File corrupt. Resetting to empty database:', err.message);
       dbData = { user_links: {}, balances: {} };
@@ -169,37 +241,45 @@ async function getAllLinks() {
   }
 }
 
-// Balance Cache Operations
-async function getCachedBalance(ign) {
+// Balance Cache Operations (Scoped by sheet_owner)
+async function getCachedBalance(ign, sheetOwner = 'JosephSteel') {
+  const owner = sheetOwner || 'JosephSteel';
   if (pool) {
-    const res = await pool.query('SELECT ign, balance, total, fine, last_updated FROM balances WHERE LOWER(ign) = LOWER($1)', [ign]);
+    const res = await pool.query(
+      'SELECT ign, sheet_owner, balance, total, fine, last_updated FROM balances WHERE LOWER(ign) = LOWER($1) AND LOWER(sheet_owner) = LOWER($2)', 
+      [ign, owner]
+    );
     return res.rows[0] || null;
   } else {
-    const record = dbData.balances[ign.toLowerCase()];
+    const key = `${ign.toLowerCase()}_${owner.toLowerCase()}`;
+    const record = dbData.balances[key];
     return record ? { ...record } : null;
   }
 }
 
-async function updateCachedBalance(ign, balance, total, fine) {
+async function updateCachedBalance(ign, sheetOwner, balance, total, fine) {
+  const owner = sheetOwner || 'JosephSteel';
   const balNum = parseFloat(balance);
   const totNum = parseFloat(total);
   const fineNum = parseFloat(fine);
 
   if (pool) {
     const query = `
-      INSERT INTO balances (ign, balance, total, fine, last_updated)
-      VALUES ($1, $2, $3, $4, CURRENT_TIMESTAMP)
-      ON CONFLICT (ign) 
+      INSERT INTO balances (ign, sheet_owner, balance, total, fine, last_updated)
+      VALUES ($1, $2, $3, $4, $5, CURRENT_TIMESTAMP)
+      ON CONFLICT (ign, sheet_owner) 
       DO UPDATE SET 
         balance = EXCLUDED.balance,
         total = EXCLUDED.total,
         fine = EXCLUDED.fine,
         last_updated = CURRENT_TIMESTAMP
     `;
-    await pool.query(query, [ign, balNum, totNum, fineNum]);
+    await pool.query(query, [ign, owner, balNum, totNum, fineNum]);
   } else {
-    dbData.balances[ign.toLowerCase()] = {
+    const key = `${ign.toLowerCase()}_${owner.toLowerCase()}`;
+    dbData.balances[key] = {
       ign,
+      sheet_owner: owner,
       balance: balNum,
       total: totNum,
       fine: fineNum,
@@ -210,16 +290,28 @@ async function updateCachedBalance(ign, balance, total, fine) {
   return { changes: 1 };
 }
 
-async function getAllCachedBalances() {
+async function getAllCachedBalances(sheetOwner) {
   const cacheMap = new Map();
+  const ownerFilter = sheetOwner ? sheetOwner.toLowerCase() : null;
+
   if (pool) {
-    const res = await pool.query('SELECT ign, balance, total, fine FROM balances');
+    let query = 'SELECT ign, sheet_owner, balance, total, fine FROM balances';
+    let params = [];
+    if (ownerFilter) {
+      query += ' WHERE LOWER(sheet_owner) = $1';
+      params.push(ownerFilter);
+    }
+    const res = await pool.query(query, params);
     for (const row of res.rows) {
-      cacheMap.set(row.ign.toLowerCase(), row);
+      const mapKey = `${row.ign.toLowerCase()}_${row.sheet_owner.toLowerCase()}`;
+      cacheMap.set(mapKey, row);
     }
   } else {
     for (const key of Object.keys(dbData.balances)) {
-      cacheMap.set(key, { ...dbData.balances[key] });
+      const record = dbData.balances[key];
+      if (!ownerFilter || record.sheet_owner.toLowerCase() === ownerFilter) {
+        cacheMap.set(key, { ...record });
+      }
     }
   }
   return cacheMap;

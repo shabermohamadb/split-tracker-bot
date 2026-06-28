@@ -4,7 +4,7 @@ const http = require('http');
 const { Client, GatewayIntentBits, Collection, REST, Routes } = require('discord.js');
 const config = require('./config');
 const db = require('./database');
-const { startNotifier } = require('./notifier');
+const { startNotifier, checkForUpdates } = require('./notifier');
 const { fetchSheetData } = require('./sheets');
 const { createSplitEmbed } = require('./commands/mysplit');
 
@@ -32,9 +32,30 @@ const server = http.createServer(async (req, res) => {
       res.writeHead(200, { 'Content-Type': 'application/javascript' });
       res.end(fs.readFileSync(path.join(__dirname, '../public/app.js')));
     } else if (pathname === '/api/splits') {
-      const players = await fetchSheetData();
-      res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ success: true, players }));
+      try {
+        const players1 = await fetchSheetData(config.spreadsheetId);
+        let players2 = [];
+        if (config.spreadsheetId2) {
+          try {
+            players2 = await fetchSheetData(config.spreadsheetId2);
+          } catch (err) {
+            console.error('[Web Server] Failed to fetch sheet 2:', err.message);
+          }
+        }
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({
+          success: true,
+          josephsteel: players1,
+          king: players2,
+          owner1: config.owner1,
+          owner2: config.owner2,
+          url1: config.spreadsheetUrl,
+          url2: config.spreadsheetUrl2
+        }));
+      } catch (err) {
+        res.writeHead(500, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: false, error: err.message }));
+      }
     } else if (pathname === '/api/links') {
       try {
         const links = await db.getAllLinks();
@@ -58,7 +79,6 @@ const server = http.createServer(async (req, res) => {
       } catch (err) {
         res.writeHead(500, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ success: false, error: err.message }));
-      }
     } else if (pathname === '/api/status') {
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({
@@ -190,14 +210,27 @@ client.on('interactionCreate', async interaction => {
         }
 
         console.log(`[Button] User ${interaction.user.tag} requested live refresh for IGN "${link.ign}"`);
-        const players = await fetchSheetData();
-        const matchedPlayer = players.find(p => p.name.toLowerCase() === link.ign.toLowerCase());
-
-        if (matchedPlayer) {
-          await db.updateCachedBalance(matchedPlayer.name, matchedPlayer.balance, matchedPlayer.total, matchedPlayer.fine);
+        const players1 = await fetchSheetData(config.spreadsheetId);
+        let players2 = [];
+        if (config.spreadsheetId2) {
+          try {
+            players2 = await fetchSheetData(config.spreadsheetId2);
+          } catch (err) {
+            console.error('[Button] Failed to fetch sheet 2:', err.message);
+          }
         }
 
-        const embed = createSplitEmbed(link.ign, matchedPlayer);
+        const matchedPlayer1 = players1.find(p => p.name.toLowerCase() === link.ign.toLowerCase());
+        const matchedPlayer2 = players2.find(p => p.name.toLowerCase() === link.ign.toLowerCase());
+
+        if (matchedPlayer1) {
+          await db.updateCachedBalance(matchedPlayer1.name, config.owner1, matchedPlayer1.balance, matchedPlayer1.total, matchedPlayer1.fine);
+        }
+        if (matchedPlayer2) {
+          await db.updateCachedBalance(matchedPlayer2.name, config.owner2, matchedPlayer2.balance, matchedPlayer2.total, matchedPlayer2.fine);
+        }
+
+        const embed = createSplitEmbed(link.ign, matchedPlayer1, matchedPlayer2);
         
         await interaction.editReply({
           embeds: [embed],
