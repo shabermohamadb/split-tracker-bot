@@ -80,6 +80,17 @@ const server = http.createServer(async (req, res) => {
         res.writeHead(500, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ success: false, error: err.message }));
       }
+    } else if (pathname === '/api/debug') {
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({
+        spreadsheetId1: config.spreadsheetId,
+        spreadsheetId2: config.spreadsheetId2,
+        url1: config.spreadsheetUrl ? 'set' : 'empty',
+        url2: config.spreadsheetUrl2 ? 'set' : 'empty',
+        dbMode: db.pool ? 'PostgreSQL' : 'JSON Local',
+        owner1: config.owner1,
+        owner2: config.owner2
+      }));
     } else if (pathname === '/api/status') {
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({
