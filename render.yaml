@@ -12,8 +12,14 @@ services:
         value: 20.0.0
       - key: SPREADSHEET_URL
         value: https://docs.google.com/spreadsheets/d/1lXrXb3ek7ewkPhx2WHuKPaJzUHqSHo2Lahvr58fXdZ4/edit?usp=sharing
+      - key: SPREADSHEET_URL_2
+        value: https://docs.google.com/spreadsheets/d/1hrGVsPgqX8cZI0-GNQybzyiMFtFSoT0st_bml8RX3-8/edit?usp=sharing
+      - key: SPREADSHEET_OWNER_1
+        value: JosephSteel
+      - key: SPREADSHEET_OWNER_2
+        value: King
       - key: POLL_INTERVAL_MINUTES
-        value: 10
+        value: 1
       - key: DISCORD_TOKEN
         sync: false # User will set this secret in the Render dashboard
       - key: DISCORD_CLIENT_ID
