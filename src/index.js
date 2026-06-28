@@ -35,6 +35,30 @@ const server = http.createServer(async (req, res) => {
       const players = await fetchSheetData();
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ success: true, players }));
+    } else if (pathname === '/api/links') {
+      try {
+        const links = await db.getAllLinks();
+        const resolvedLinks = [];
+        for (const link of links) {
+          let username = 'Unknown';
+          try {
+            const user = await client.users.fetch(link.discord_id);
+            username = user.username;
+          } catch (err) {
+            username = `ID: ${link.discord_id}`;
+          }
+          resolvedLinks.push({
+            discord_id: link.discord_id,
+            ign: link.ign,
+            discord_username: username
+          });
+        }
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: true, links: resolvedLinks }));
+      } catch (err) {
+        res.writeHead(500, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: false, error: err.message }));
+      }
     } else if (pathname === '/api/status') {
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({

@@ -36,6 +36,7 @@
     <nav class="nav-tabs">
       <button class="tab-btn active" data-tab="search-section">🔍 Player Search</button>
       <button class="tab-btn" data-tab="leaderboard-section">📋 Guild Standings</button>
+      <button class="tab-btn" data-tab="links-section">🔗 Linked Accounts</button>
       <button class="tab-btn" data-tab="info-section">ℹ️ Help & Guide</button>
     </nav>
 
@@ -135,7 +136,31 @@
         </div>
       </section>
 
-      <!-- TAB 3: HELP & GUIDE -->
+      <!-- TAB 3: DATABASE LINKS -->
+      <section id="links-section" class="tab-content">
+        <div class="glass-card">
+          <div class="table-header">
+            <h2>Linked Discord Accounts Database</h2>
+            <p style="color: var(--text-secondary); font-size: 0.9rem;">Shows active database mappings linking character IGNs to their Discord users.</p>
+          </div>
+          <div class="table-container">
+            <table class="leaderboard-table">
+              <thead>
+                <tr>
+                  <th>Albion IGN</th>
+                  <th>Discord Username</th>
+                  <th>Discord User ID</th>
+                </tr>
+              </thead>
+              <tbody id="links-body">
+                <!-- Populated via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 4: HELP & GUIDE -->
       <section id="info-section" class="tab-content">
         <div class="glass-card info-card">
           <h2>Discord Bot Setup & Help</h2>

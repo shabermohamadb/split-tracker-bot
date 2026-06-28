@@ -35,32 +35,33 @@ module.exports = {
       const players = await fetchSheetData();
       const matchedPlayer = players.find(p => p.name.toLowerCase() === inputIgn.toLowerCase());
       
-      const targetIgn = matchedPlayer ? matchedPlayer.name : inputIgn;
-      
-      // Save link to database for target user
-      await db.linkUser(targetUser.id, targetIgn);
-      
       const embed = new EmbedBuilder().setTimestamp();
 
       if (matchedPlayer) {
+        const targetIgn = matchedPlayer.name;
+        
+        // Save link to database for target user
+        await db.linkUser(targetUser.id, targetIgn);
+
         embed.setTitle('✅ Account Linked by Admin')
           .setDescription(`Successfully linked <@${targetUser.id}> to the Albion IGN: **${targetIgn}**`)
           .setColor('#4caf50')
           .addFields(
-            { name: 'Current Balance', value: `\`${matchedPlayer.balance.toFixed(3)}M\` Silver`, inline: true },
-            { name: 'Total Payouts', value: `\`${matchedPlayer.total.toFixed(3)}M\` Silver`, inline: true },
+            { name: 'Current Balance', value: `\`${matchedPlayer.total.toFixed(3)}M\` Silver`, inline: false },
+            { name: 'Starting Balance', value: `\`${matchedPlayer.balance.toFixed(3)}M\` Silver`, inline: true },
             { name: 'Fines / Withdraws', value: `\`${matchedPlayer.fine.toFixed(3)}M\` Silver`, inline: true }
           )
           .setFooter({ text: `Linked by Admin: ${interaction.user.tag}` });
       } else {
-        embed.setTitle('⚠️ Linked with Warning by Admin')
+        // Reject link
+        embed.setTitle('❌ Linking Failed')
           .setDescription(
-            `Linked <@${targetUser.id}> to **${targetIgn}**.\n\n` +
-            `❌ **Warning**: This IGN was not found in the current spreadsheet.\n` +
-            `Ensure the name matches the spreadsheet exact casing/spelling if possible.`
+            `The IGN **${inputIgn}** was not found in the current loot split spreadsheet.\n\n` +
+            `• Check spelling and casing.\n` +
+            `• The user <@${targetUser.id}> **was not linked**.`
           )
-          .setColor('#ff9800')
-          .setFooter({ text: `Linked by Admin: ${interaction.user.tag}` });
+          .setColor('#f44336')
+          .setFooter({ text: `Rejected by Admin: ${interaction.user.tag}` });
       }
 
       return await interaction.editReply({ embeds: [embed] });

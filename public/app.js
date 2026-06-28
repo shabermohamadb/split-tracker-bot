@@ -19,7 +19,8 @@ const elements = {
   leaderboardBody: document.getElementById('leaderboard-body'),
   quickLinks: document.getElementById('quick-links'),
   tabs: document.querySelectorAll('.tab-btn'),
-  filterBtns: document.querySelectorAll('.filter-btn')
+  filterBtns: document.querySelectorAll('.filter-btn'),
+  linksBody: document.getElementById('links-body')
 };
 
 // Initialize Application
@@ -279,6 +280,11 @@ function switchTab(tabId) {
       section.classList.remove('active');
     }
   });
+
+  // Load database links if selected
+  if (tabId === 'links-section') {
+    loadDatabaseLinks();
+  }
 }
 
 // 🎛️ Directory Filters setup
@@ -345,6 +351,73 @@ function renderQuickLinks() {
     });
     elements.quickLinks.appendChild(btn);
   });
+}
+
+// Load active database links
+async function loadDatabaseLinks() {
+  elements.linksBody.innerHTML = `
+    <tr>
+      <td colspan="3" style="text-align: center; color: var(--text-secondary);">
+        ⏳ Loading database mappings from bot...
+      </td>
+    </tr>
+  `;
+
+  try {
+    const res = await fetch('/api/links');
+    if (!res.ok) throw new Error('API error');
+    const data = await res.json();
+
+    if (data.success && data.links) {
+      elements.linksBody.innerHTML = '';
+      if (data.links.length === 0) {
+        elements.linksBody.innerHTML = `
+          <tr>
+            <td colspan="3" style="text-align: center; color: var(--text-secondary); font-style: italic;">
+              No accounts linked in the bot database yet. Nicknames will auto-sync when they check splits!
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      // Sort links by IGN alphabetically
+      data.links.sort((a, b) => a.ign.localeCompare(b.ign));
+
+      data.links.forEach(link => {
+        const row = document.createElement('tr');
+        
+        const ignCell = document.createElement('td');
+        ignCell.className = 'player-name-cell';
+        ignCell.textContent = link.ign;
+        ignCell.addEventListener('click', () => {
+          switchTab('search-section');
+          elements.ignInput.value = link.ign;
+          performSearch(link.ign);
+        });
+
+        row.appendChild(ignCell);
+        
+        row.innerHTML += `
+          <td style="color: var(--gold); font-weight: 500;">@${link.discord_username}</td>
+          <td style="font-family: monospace; font-size: 0.85rem; color: var(--text-secondary);">${link.discord_id}</td>
+        `;
+
+        // Put back the clickable IGN cell node
+        row.replaceChild(ignCell, row.firstChild);
+        elements.linksBody.appendChild(row);
+      });
+    }
+  } catch (err) {
+    console.error('Failed to load database links:', err);
+    elements.linksBody.innerHTML = `
+      <tr>
+        <td colspan="3" style="text-align: center; color: var(--red);">
+          ❌ Error: Failed to fetch bot database links.
+        </td>
+      </tr>
+    `;
+  }
 }
 
 // Launch

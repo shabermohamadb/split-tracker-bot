@@ -21,37 +21,36 @@ module.exports = {
       const players = await fetchSheetData();
       const matchedPlayer = players.find(p => p.name.toLowerCase() === inputIgn.toLowerCase());
       
-      const targetIgn = matchedPlayer ? matchedPlayer.name : inputIgn;
-      
-      // Save link to database
-      await db.linkUser(interaction.user.id, targetIgn);
-      
       const embed = new EmbedBuilder().setTimestamp();
 
       if (matchedPlayer) {
+        const targetIgn = matchedPlayer.name;
+        
+        // Save link to database
+        await db.linkUser(interaction.user.id, targetIgn);
+
         embed.setTitle('✅ Account Linked Successfully')
           .setDescription(`Your Discord account is now linked to the Albion IGN: **${targetIgn}**`)
           .setColor('#4caf50')
           .addFields(
-            { name: 'Current Balance', value: `\`${matchedPlayer.balance.toFixed(3)}M\` Silver`, inline: true },
-            { name: 'Total Payouts', value: `\`${matchedPlayer.total.toFixed(3)}M\` Silver`, inline: true },
+            { name: 'Current Balance', value: `\`${matchedPlayer.total.toFixed(3)}M\` Silver`, inline: false },
+            { name: 'Starting Balance', value: `\`${matchedPlayer.balance.toFixed(3)}M\` Silver`, inline: true },
             { name: 'Fines / Withdraws', value: `\`${matchedPlayer.fine.toFixed(3)}M\` Silver`, inline: true }
           )
           .setFooter({ text: 'Split Tracker • Use /mysplit to check your balance' });
 
         return await interaction.editReply({ embeds: [embed] });
       } else {
-        // Linked but with warning (not found in sheet)
-        embed.setTitle('⚠️ Linked with Warning')
+        // Reject linking
+        embed.setTitle('❌ Linking Failed')
           .setDescription(
-            `Your Discord account was linked to **${targetIgn}**.\n\n` +
-            `❌ **Warning**: This IGN was not found in the current loot split spreadsheet.\n\n` +
-            `• Please check if you spelt your IGN correctly.\n` +
-            `• If you are a new member, please wait for an administrator to add you to the sheet.\n` +
-            `• You can re-run \`/linkign\` anytime to correct a spelling error.`
+            `The IGN **${inputIgn}** was not found in the current loot split spreadsheet.\n\n` +
+            `• Please check your spelling and casing.\n` +
+            `• If you are a new member, please ask an administrator to add your IGN to the sheet first.\n` +
+            `• Your account **was not linked**.`
           )
-          .setColor('#ff9800') // Orange warning
-          .setFooter({ text: 'Split Tracker • Unverified IGN' });
+          .setColor('#f44336') // Red error color
+          .setFooter({ text: 'Split Tracker • Invalid IGN' });
 
         return await interaction.editReply({ embeds: [embed] });
       }
