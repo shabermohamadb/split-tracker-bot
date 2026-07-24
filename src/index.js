@@ -118,6 +118,8 @@ const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMembers,
+    GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.MessageContent,
   ],
 });
 
@@ -130,6 +132,12 @@ const commandsJson = [];
 for (const file of commandFiles) {
   const filePath = path.join(commandsPath, file);
   const command = require(filePath);
+  
+  // Skip AI commands if the AI module is disabled
+  if (command.isAiCommand && !config.aiEnabled) {
+    continue;
+  }
+
   if ('data' in command && 'execute' in command) {
     client.commands.set(command.data.name, command);
     commandsJson.push(command.data.toJSON());
@@ -145,6 +153,16 @@ client.once('ready', async () => {
   
   // 1. Initialize DB
   await db.initDb();
+
+  // Initialize AI DB if module is enabled
+  if (config.aiEnabled) {
+    try {
+      const aiDb = require('./ai/database');
+      await aiDb.initDb();
+    } catch (err) {
+      console.error('[AI Database] Initialization failed on boot:', err.message);
+    }
+  }
   
   // 2. Register Slash Commands
   const rest = new REST().setToken(config.discordToken);
@@ -176,6 +194,19 @@ client.once('ready', async () => {
 
 // Interaction Event Handler
 client.on('interactionCreate', async interaction => {
+  // Autocomplete handling for AI commands
+  if (interaction.isAutocomplete()) {
+    const command = client.commands.get(interaction.commandName);
+    if (command && command.autocomplete) {
+      try {
+        await command.autocomplete(interaction);
+      } catch (err) {
+        console.error(`[Autocomplete Error] command ${interaction.commandName}:`, err);
+      }
+    }
+    return;
+  }
+
   // Slash Commands
   if (interaction.isChatInputCommand()) {
     const command = client.commands.get(interaction.commandName);
@@ -254,6 +285,18 @@ client.on('interactionCreate', async interaction => {
           ephemeral: true,
         });
       }
+    }
+  }
+});
+
+// Message Create Event (AI Multi-message conversations)
+client.on('messageCreate', async message => {
+  if (config.aiEnabled) {
+    try {
+      const aiModule = require('./ai');
+      await aiModule.handleMessage(client, message);
+    } catch (err) {
+      console.error('[AI Message Listener] Error handling messageCreate:', err.message);
     }
   }
 });

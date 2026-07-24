@@ -38,4 +38,5 @@ module.exports = {
   pollIntervalMs: (parseInt(process.env.POLL_INTERVAL_MINUTES, 10) || 1) * 60 * 1000,
   notificationChannelId: process.env.NOTIFICATION_CHANNEL_ID || null,
   adminRoleId: process.env.ADMIN_ROLE_ID || null,
+  aiEnabled: process.env.AI_MODULE_ENABLED === 'true',
 };
