@@ -96,11 +96,14 @@ async function streamToDiscord(message, prunedMessages, options = {}) {
 async function handleMessage(discordClient, message) {
   if (message.author.bot) return;
 
+  const cleanContent = message.content.trim();
+  const isPrefixCommand = cleanContent.toLowerCase().startsWith('/ai ');
+
   const isMentioned = message.mentions.has(discordClient.user.id);
   const isReplyToBot = message.reference && await checkIsReplyToBot(message, discordClient.user.id);
   const isThreadActivity = message.channel.isThread() && await checkIsAIThread(message.channel.id);
 
-  if (!isMentioned && !isReplyToBot && !isThreadActivity) {
+  if (!isMentioned && !isReplyToBot && !isThreadActivity && !isPrefixCommand) {
     return; // Not an AI conversation trigger
   }
 
@@ -151,7 +154,12 @@ async function handleMessage(discordClient, message) {
 
       // 4. Download and parse attachments
       const textAttachment = await parseAttachments(message);
-      let userPrompt = message.content.replace(`<@${discordClient.user.id}>`, '').trim();
+      let userPrompt = '';
+      if (isPrefixCommand) {
+        userPrompt = message.content.substring(4).trim();
+      } else {
+        userPrompt = message.content.replace(`<@${discordClient.user.id}>`, '').trim();
+      }
 
       if (textAttachment) {
         messages.push({ role: 'system', content: textAttachment });
