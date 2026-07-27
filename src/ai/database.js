@@ -5,17 +5,14 @@ const { Pool } = require('pg');
 const dbDir = path.join(__dirname, '../../data');
 const dbPath = path.join(dbDir, 'ai_db.json');
 
-// Memory cache of AI database state (JSON fallback)
 let dbData = {
   conversations: {},
   preferences: {},
   statistics: {}
 };
 
-// PostgreSQL pool
 let pool = null;
 if (process.env.DATABASE_URL) {
-  console.log('[AI Database] Connecting to PostgreSQL database...');
   pool = new Pool({
     connectionString: process.env.DATABASE_URL,
     ssl: {
@@ -30,7 +27,7 @@ function saveDbJson() {
     fs.writeFileSync(tempPath, JSON.stringify(dbData, null, 2), 'utf8');
     fs.renameSync(tempPath, dbPath);
   } catch (err) {
-    console.error('[AI Database] Failed to write JSON database file:', err.message);
+    console.error(err.message);
   }
 }
 
@@ -47,7 +44,6 @@ function initJsonDb() {
       dbData.preferences = dbData.preferences || {};
       dbData.statistics = dbData.statistics || {};
     } catch (err) {
-      console.warn('[AI Database] Failed to parse JSON database. Resetting to empty state.', err.message);
       dbData = { conversations: {}, preferences: {}, statistics: {} };
       saveDbJson();
     }
@@ -59,10 +55,8 @@ function initJsonDb() {
 async function initDb() {
   if (pool) {
     try {
-      // Connect check
       await pool.query('SELECT NOW()');
 
-      // Create ai_conversations table
       await pool.query(`
         CREATE TABLE IF NOT EXISTS ai_conversations (
           channel_id TEXT PRIMARY KEY,
@@ -72,7 +66,6 @@ async function initDb() {
         );
       `);
 
-      // Create ai_preferences table
       await pool.query(`
         CREATE TABLE IF NOT EXISTS ai_preferences (
           user_id TEXT PRIMARY KEY,
@@ -83,7 +76,6 @@ async function initDb() {
         );
       `);
 
-      // Create ai_statistics table
       await pool.query(`
         CREATE TABLE IF NOT EXISTS ai_statistics (
           user_id TEXT,
@@ -93,20 +85,15 @@ async function initDb() {
           PRIMARY KEY (user_id, day)
         );
       `);
-
-      console.log('[AI Database] PostgreSQL tables initialized successfully.');
     } catch (err) {
-      console.error('[AI Database] PostgreSQL connection failed. Falling back to local JSON file db.', err.message);
       pool = null;
       initJsonDb();
     }
   } else {
     initJsonDb();
-    console.log('[AI Database] Local JSON file initialized successfully.');
   }
 }
 
-// Conversation functions
 async function getConversation(channelId) {
   if (pool) {
     const res = await pool.query('SELECT messages FROM ai_conversations WHERE channel_id = $1', [channelId]);
@@ -143,7 +130,6 @@ async function clearConversation(channelId) {
   }
 }
 
-// User preferences functions
 async function getUserPreference(userId) {
   if (pool) {
     const res = await pool.query('SELECT model, system_prompt, temperature, max_tokens FROM ai_preferences WHERE user_id = $1', [userId]);
@@ -179,7 +165,6 @@ async function setUserPreference(userId, prefs) {
   }
 }
 
-// Statistics / limits functions
 async function logUsage(userId, tokens) {
   const todayStr = new Date().toISOString().split('T')[0];
   if (pool) {

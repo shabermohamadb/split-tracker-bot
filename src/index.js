@@ -133,7 +133,6 @@ for (const file of commandFiles) {
   const filePath = path.join(commandsPath, file);
   const command = require(filePath);
   
-  // Skip AI commands if the AI module is disabled
   if (command.isAiCommand && !config.aiEnabled) {
     continue;
   }
@@ -154,11 +153,12 @@ client.once('ready', async () => {
   // 1. Initialize DB
   await db.initDb();
 
-  // Initialize AI DB if module is enabled
   if (config.aiEnabled) {
     try {
       const aiDb = require('./ai/database');
       await aiDb.initDb();
+      const scheduler = require('./ai/scheduler');
+      scheduler.startDailyReminder(client, '853633474869854219');
     } catch (err) {
       console.error('[AI Database] Initialization failed on boot:', err.message);
     }
@@ -194,7 +194,6 @@ client.once('ready', async () => {
 
 // Interaction Event Handler
 client.on('interactionCreate', async interaction => {
-  // Autocomplete handling for AI commands
   if (interaction.isAutocomplete()) {
     const command = client.commands.get(interaction.commandName);
     if (command && command.autocomplete) {

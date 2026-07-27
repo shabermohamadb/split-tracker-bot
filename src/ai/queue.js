@@ -1,14 +1,9 @@
 const db = require('./database');
 const config = require('./config');
 
-// In-memory maps
 const cooldowns = new Map();
 const activeQueues = new Map();
 
-/**
- * Checks if a user is currently inside their cooldown window.
- * Returns remaining seconds if on cooldown, 0 otherwise.
- */
 function getRemainingCooldown(userId) {
   const lastUsed = cooldowns.get(userId);
   if (!lastUsed) return 0;
@@ -20,16 +15,10 @@ function getRemainingCooldown(userId) {
   return 0;
 }
 
-/**
- * Sets a user's cooldown start timestamp.
- */
 function triggerCooldown(userId) {
   cooldowns.set(userId, Date.now());
 }
 
-/**
- * Validates if the user has reached their daily limit.
- */
 async function checkDailyLimits(userId) {
   try {
     const usage = await db.getUsage(userId);
@@ -38,15 +27,11 @@ async function checkDailyLimits(userId) {
     }
     return { limited: false };
   } catch (err) {
-    console.error('[AI Queue] Error checking daily limits:', err.message);
-    return { limited: false }; // Fail-safe
+    console.error(err.message);
+    return { limited: false };
   }
 }
 
-/**
- * Enqueues a task (function returning a Promise) for a user,
- * executing them sequentially to prevent concurrency errors.
- */
 function enqueue(userId, taskFn) {
   let chain = activeQueues.get(userId) || Promise.resolve();
 
@@ -54,13 +39,11 @@ function enqueue(userId, taskFn) {
     return await taskFn();
   });
 
-  // Maintain queue chain
   activeQueues.set(
     userId,
     currentTask
-      .catch(() => {}) // Suppress queue propagation crashes
+      .catch(() => {})
       .then(() => {
-        // Clean up queue key if this was the last task in the chain
         if (activeQueues.get(userId) === currentTask) {
           activeQueues.delete(userId);
         }

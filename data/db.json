@@ -1,0 +1,677 @@
+{
+  "user_links": {},
+  "balances": {
+    "josephsteals_josephsteel": {
+      "ign": "JOSEPHSTEALS",
+      "sheet_owner": "JosephSteel",
+      "balance": 0,
+      "total": 0,
+      "fine": 0,
+      "last_updated": "2026-07-27T09:23:35.353Z"
+    },
+    "black heart_josephsteel": {
+      "ign": "BLACK HEART",
+      "sheet_owner": "JosephSteel",
+      "balance": 15.95,
+      "total": 20.05,
+      "fine": 0,
+      "last_updated": "2026-07-27T09:23:35.358Z"
+    },
+    "king_josephsteel": {
+      "ign": "KING",
+      "sheet_owner": "JosephSteel",
+      "balance": 0,
+      "total": 0,
+      "fine": 0,
+      "last_updated": "2026-07-27T09:23:35.363Z"
+    },
+    "onih_josephsteel": {
+      "ign": "ONIH",
+      "sheet_owner": "JosephSteel",
+      "balance": 2.185,
+      "total": 16.635,
+      "fine": 0,
+      "last_updated": "2026-07-27T09:23:35.368Z"
+    },
+    "ironreaper_josephsteel": {
+      "ign": "IRONREAPER",
+      "sheet_owner": "JosephSteel",
+      "balance": 0,
+      "total": 0,
+      "fine": 0,
+      "last_updated": "2026-07-27T09:23:35.373Z"
+    },
+    "astrologia_josephsteel": {
+      "ign": "ASTROLOGIA",
+      "sheet_owner": "JosephSteel",
+      "balance": 0,
+      "total": 0,
+      "fine": 0,
+      "last_updated": "2026-07-27T09:23:35.377Z"
+    },
+    "zenitzuu_josephsteel": {
+      "ign": "ZENITZUU",
+      "sheet_owner": "JosephSteel",
+      "balance": 0,
+      "total": 0,
+      "fine": 0,
+      "last_updated": "2026-07-27T09:23:35.381Z"
+    },
+    "branatic_josephsteel": {
+      "ign": "BRANATIC",
+      "sheet_owner": "JosephSteel",
+      "balance": 0,
+      "total": 0,
+      "fine": 0,
+      "last_updated": "2026-07-27T09:23:35.386Z"
+    },
+    "purge_josephsteel": {
+      "ign": "PURGE",
+      "sheet_owner": "JosephSteel",
+      "balance": 0,
+      "total": 0,
+      "fine": 0,
+      "last_updated": "2026-07-27T09:23:35.391Z"
+    },
+    "drifting_josephsteel": {
+      "ign": "DRIFTING",
+      "sheet_owner": "JosephSteel",
+      "balance": 19.82,
+      "total": 19.82,
+      "fine": 0,
+      "last_updated": "2026-07-27T09:23:35.395Z"
+    },
+    "aural_josephsteel": {
+      "ign": "AURAL",
+      "sheet_owner": "JosephSteel",
+      "balance": 0,
+      "total": 0,
+      "fine": 0,
+      "last_updated": "2026-07-27T09:23:35.399Z"
+    },
+    "sai23_josephsteel": {
+      "ign": "SAI23",
+      "sheet_owner": "JosephSteel",
+      "balance": 0,
+      "total": 0,
+      "fine": 0,
+      "last_updated": "2026-07-27T09:23:35.404Z"
+    },
+    "phaphie_josephsteel": {
+      "ign": "PHAPHIE",
+      "sheet_owner": "JosephSteel",
+      "balance": 14.76,
+      "total": 14.76,
+      "fine": 0,
+      "last_updated": "2026-07-27T09:23:35.408Z"
+    },
+    "xxxtentacionxxx_josephsteel": {
+      "ign": "XXXTENTACIONXXX",
+      "sheet_owner": "JosephSteel",
+      "balance": 0,
+      "total": 0,
+      "fine": 0,
+      "last_updated": "2026-07-27T09:23:35.411Z"
+    },
+    "aghma_josephsteel": {
+      "ign": "AGHMA",
+      "sheet_owner": "JosephSteel",
+      "balance": 8.42,
+      "total": 8.42,
+      "fine": 0,
+      "last_updated": "2026-07-27T09:23:35.414Z"
+    },
+    "empressqiyana_josephsteel": {
+      "ign": "EMPRESSQIYANA",
+      "sheet_owner": "JosephSteel",
+      "balance": 3.5,
+      "total": 3.5,
+      "fine": 0,
+      "last_updated": "2026-07-27T09:23:35.419Z"
+    },
+    "nyawme_josephsteel": {
+      "ign": "NYAWME",
+      "sheet_owner": "JosephSteel",
+      "balance": 3.5,
+      "total": 3.5,
+      "fine": 0,
+      "last_updated": "2026-07-27T09:23:35.422Z"
+    },
+    "poofyandee_josephsteel": {
+      "ign": "POOFYANDEE",
+      "sheet_owner": "JosephSteel",
+      "balance": 0,
+      "total": 0,
+      "fine": 0,
+      "last_updated": "2026-07-27T09:23:35.426Z"
+    },
+    "shyama_josephsteel": {
+      "ign": "SHYAMA",
+      "sheet_owner": "JosephSteel",
+      "balance": 0,
+      "total": 0,
+      "fine": 0,
+      "last_updated": "2026-07-27T09:23:35.430Z"
+    },
+    "lukedemon_josephsteel": {
+      "ign": "LUKEDEMON",
+      "sheet_owner": "JosephSteel",
+      "balance": 0,
+      "total": 0,
+      "fine": 0,
+      "last_updated": "2026-07-27T09:23:35.434Z"
+    },
+    "curseofgrinding_josephsteel": {
+      "ign": "CURSEOFGRINDING",
+      "sheet_owner": "JosephSteel",
+      "balance": -1.955,
+      "total": -1.955,
+      "fine": 0,
+      "last_updated": "2026-07-27T09:23:35.439Z"
+    },
+    "dynamoo_josephsteel": {
+      "ign": "DYNAMOO",
+      "sheet_owner": "JosephSteel",
+      "balance": 0,
+      "total": 0,
+      "fine": 0,
+      "last_updated": "2026-07-27T09:23:35.442Z"
+    },
+    "kakavashaa_josephsteel": {
+      "ign": "KAKAVASHAA",
+      "sheet_owner": "JosephSteel",
+      "balance": 0,
+      "total": 0,
+      "fine": 0,
+      "last_updated": "2026-07-27T09:23:35.446Z"
+    },
+    "imperial2010_josephsteel": {
+      "ign": "IMPERIAL2010",
+      "sheet_owner": "JosephSteel",
+      "balance": 0,
+      "total": 0,
+      "fine": 0,
+      "last_updated": "2026-07-27T09:23:35.450Z"
+    },
+    "meraz_josephsteel": {
+      "ign": "MERAZ",
+      "sheet_owner": "JosephSteel",
+      "balance": 0,
+      "total": 0,
+      "fine": 0,
+      "last_updated": "2026-07-27T09:23:35.454Z"
+    },
+    "truemax_josephsteel": {
+      "ign": "TRUEMAX",
+      "sheet_owner": "JosephSteel",
+      "balance": 3.6,
+      "total": 3.6,
+      "fine": 0,
+      "last_updated": "2026-07-27T09:23:35.458Z"
+    },
+    "jalak_josephsteel": {
+      "ign": "JALAK",
+      "sheet_owner": "JosephSteel",
+      "balance": 2.41,
+      "total": 2.41,
+      "fine": 0,
+      "last_updated": "2026-07-27T09:23:35.461Z"
+    },
+    "ladyflowa_josephsteel": {
+      "ign": "LADYFLOWA",
+      "sheet_owner": "JosephSteel",
+      "balance": 2.41,
+      "total": 2.41,
+      "fine": 0,
+      "last_updated": "2026-07-27T09:23:35.465Z"
+    },
+    "flick_josephsteel": {
+      "ign": "FLICK",
+      "sheet_owner": "JosephSteel",
+      "balance": 6.4,
+      "total": 6.4,
+      "fine": 0,
+      "last_updated": "2026-07-27T09:23:35.470Z"
+    },
+    "kaneki_josephsteel": {
+      "ign": "KANEKI",
+      "sheet_owner": "JosephSteel",
+      "balance": 0,
+      "total": 0,
+      "fine": 0,
+      "last_updated": "2026-07-27T09:23:35.473Z"
+    },
+    "drungkensnail_josephsteel": {
+      "ign": "DRUNGKENSNAIL",
+      "sheet_owner": "JosephSteel",
+      "balance": 0,
+      "total": 0,
+      "fine": 0,
+      "last_updated": "2026-07-27T09:23:35.477Z"
+    },
+    "zyrebut lazyy_josephsteel": {
+      "ign": "ZYREBUT LAZYY",
+      "sheet_owner": "JosephSteel",
+      "balance": 0,
+      "total": 0,
+      "fine": 0,
+      "last_updated": "2026-07-27T09:23:35.480Z"
+    },
+    "begold_josephsteel": {
+      "ign": "BEGOLD",
+      "sheet_owner": "JosephSteel",
+      "balance": 3.6,
+      "total": 10.1,
+      "fine": 0,
+      "last_updated": "2026-07-27T09:23:35.483Z"
+    },
+    "firedrago_josephsteel": {
+      "ign": "FIREDRAGO",
+      "sheet_owner": "JosephSteel",
+      "balance": 1.4,
+      "total": 1.4,
+      "fine": 0,
+      "last_updated": "2026-07-27T09:23:35.487Z"
+    },
+    "matech_josephsteel": {
+      "ign": "MATECH",
+      "sheet_owner": "JosephSteel",
+      "balance": 0,
+      "total": 0,
+      "fine": 0,
+      "last_updated": "2026-07-27T09:23:35.490Z"
+    },
+    "sicko_josephsteel": {
+      "ign": "SICKO",
+      "sheet_owner": "JosephSteel",
+      "balance": 4.1,
+      "total": 4.1,
+      "fine": 0,
+      "last_updated": "2026-07-27T09:23:35.493Z"
+    },
+    "santathecrafter_josephsteel": {
+      "ign": "SANTATHECRAFTER",
+      "sheet_owner": "JosephSteel",
+      "balance": 2.8,
+      "total": 2.8,
+      "fine": 0,
+      "last_updated": "2026-07-27T09:23:35.497Z"
+    },
+    "lastfragment_josephsteel": {
+      "ign": "LASTFRAGMENT",
+      "sheet_owner": "JosephSteel",
+      "balance": 7.7,
+      "total": 7.7,
+      "fine": 0,
+      "last_updated": "2026-07-27T09:23:35.501Z"
+    },
+    "dio_josephsteel": {
+      "ign": "DIO",
+      "sheet_owner": "JosephSteel",
+      "balance": 4.1,
+      "total": 4.1,
+      "fine": 0,
+      "last_updated": "2026-07-27T09:23:35.505Z"
+    },
+    "jhheli_josephsteel": {
+      "ign": "JHHELI",
+      "sheet_owner": "JosephSteel",
+      "balance": 0,
+      "total": 0,
+      "fine": 0.55,
+      "last_updated": "2026-07-27T09:23:35.508Z"
+    },
+    "styleofm_josephsteel": {
+      "ign": "STYLEOFM",
+      "sheet_owner": "JosephSteel",
+      "balance": 0,
+      "total": 6.5,
+      "fine": 0,
+      "last_updated": "2026-07-27T09:23:35.511Z"
+    },
+    "cenoda_josephsteel": {
+      "ign": "CENODA",
+      "sheet_owner": "JosephSteel",
+      "balance": 0,
+      "total": 3.85,
+      "fine": 0,
+      "last_updated": "2026-07-27T09:23:35.514Z"
+    },
+    "anhony_josephsteel": {
+      "ign": "ANHONY",
+      "sheet_owner": "JosephSteel",
+      "balance": 0,
+      "total": 0,
+      "fine": 0,
+      "last_updated": "2026-07-27T09:23:35.518Z"
+    },
+    "livingcolor_josephsteel": {
+      "ign": "LIVINGCOLOR",
+      "sheet_owner": "JosephSteel",
+      "balance": 0,
+      "total": 0,
+      "fine": 0,
+      "last_updated": "2026-07-27T09:23:35.522Z"
+    },
+    "enolaraven_josephsteel": {
+      "ign": "ENOLARAVEN",
+      "sheet_owner": "JosephSteel",
+      "balance": 0,
+      "total": 0,
+      "fine": 0,
+      "last_updated": "2026-07-27T09:23:35.525Z"
+    },
+    "jprime_josephsteel": {
+      "ign": "JPRIME",
+      "sheet_owner": "JosephSteel",
+      "balance": 3.2,
+      "total": 3.2,
+      "fine": 0,
+      "last_updated": "2026-07-27T09:23:35.528Z"
+    },
+    "branatic_king": {
+      "ign": "Branatic",
+      "sheet_owner": "King",
+      "balance": 54,
+      "total": 0,
+      "fine": 0,
+      "last_updated": "2026-07-27T09:23:37.018Z"
+    },
+    "curseofgrinding_king": {
+      "ign": "Curseofgrinding",
+      "sheet_owner": "King",
+      "balance": 0,
+      "total": 0,
+      "fine": 0,
+      "last_updated": "2026-07-27T09:23:37.026Z"
+    },
+    "cenoda_king": {
+      "ign": "Cenoda",
+      "sheet_owner": "King",
+      "balance": 0,
+      "total": 0,
+      "fine": 0,
+      "last_updated": "2026-07-27T09:23:37.032Z"
+    },
+    "zyre_king": {
+      "ign": "Zyre",
+      "sheet_owner": "King",
+      "balance": 0,
+      "total": 0,
+      "fine": 0,
+      "last_updated": "2026-07-27T09:23:37.039Z"
+    },
+    "jeli_king": {
+      "ign": "Jeli",
+      "sheet_owner": "King",
+      "balance": 0,
+      "total": 0,
+      "fine": 0,
+      "last_updated": "2026-07-27T09:23:37.044Z"
+    },
+    "inlivingcolor_king": {
+      "ign": "Inlivingcolor",
+      "sheet_owner": "King",
+      "balance": 0,
+      "total": 0,
+      "fine": 0,
+      "last_updated": "2026-07-27T09:23:37.051Z"
+    },
+    "oni_king": {
+      "ign": "Oni",
+      "sheet_owner": "King",
+      "balance": 0,
+      "total": 0,
+      "fine": 0,
+      "last_updated": "2026-07-27T09:23:37.056Z"
+    },
+    "miraz_king": {
+      "ign": "Miraz",
+      "sheet_owner": "King",
+      "balance": 0,
+      "total": 0,
+      "fine": 0,
+      "last_updated": "2026-07-27T09:23:37.061Z"
+    },
+    "shayama_king": {
+      "ign": "Shayama",
+      "sheet_owner": "King",
+      "balance": 0,
+      "total": 0,
+      "fine": 0,
+      "last_updated": "2026-07-27T09:23:37.067Z"
+    },
+    "dynamo_king": {
+      "ign": "Dynamo",
+      "sheet_owner": "King",
+      "balance": 0,
+      "total": 0,
+      "fine": 0,
+      "last_updated": "2026-07-27T09:23:37.071Z"
+    },
+    "zenitzuu_king": {
+      "ign": "Zenitzuu",
+      "sheet_owner": "King",
+      "balance": 0,
+      "total": 0,
+      "fine": 0,
+      "last_updated": "2026-07-27T09:23:37.077Z"
+    },
+    "aural_king": {
+      "ign": "Aural",
+      "sheet_owner": "King",
+      "balance": 0,
+      "total": 0,
+      "fine": 0,
+      "last_updated": "2026-07-27T09:23:37.081Z"
+    },
+    "purge_king": {
+      "ign": "Purge",
+      "sheet_owner": "King",
+      "balance": 0,
+      "total": 0,
+      "fine": 0,
+      "last_updated": "2026-07-27T09:23:37.087Z"
+    },
+    "begold_king": {
+      "ign": "Begold",
+      "sheet_owner": "King",
+      "balance": 0,
+      "total": 0,
+      "fine": 0,
+      "last_updated": "2026-07-27T09:23:37.092Z"
+    },
+    "imparial2010_king": {
+      "ign": "Imparial2010",
+      "sheet_owner": "King",
+      "balance": 0,
+      "total": 0,
+      "fine": 0,
+      "last_updated": "2026-07-27T09:23:37.097Z"
+    },
+    "anhony_king": {
+      "ign": "Anhony",
+      "sheet_owner": "King",
+      "balance": 0,
+      "total": 0,
+      "fine": 0,
+      "last_updated": "2026-07-27T09:23:37.102Z"
+    },
+    "matech_king": {
+      "ign": "Matech",
+      "sheet_owner": "King",
+      "balance": 0,
+      "total": 0,
+      "fine": 0,
+      "last_updated": "2026-07-27T09:23:37.107Z"
+    },
+    "srijon_king": {
+      "ign": "Srijon",
+      "sheet_owner": "King",
+      "balance": 0,
+      "total": 0,
+      "fine": 0,
+      "last_updated": "2026-07-27T09:23:37.113Z"
+    },
+    "astrologia_king": {
+      "ign": "Astrologia",
+      "sheet_owner": "King",
+      "balance": 0,
+      "total": 0,
+      "fine": 0,
+      "last_updated": "2026-07-27T09:23:37.118Z"
+    },
+    "trueman_king": {
+      "ign": "Trueman",
+      "sheet_owner": "King",
+      "balance": 0,
+      "total": 0,
+      "fine": 0,
+      "last_updated": "2026-07-27T09:23:37.123Z"
+    },
+    "king_king": {
+      "ign": "KING",
+      "sheet_owner": "King",
+      "balance": 0,
+      "total": 0,
+      "fine": 0,
+      "last_updated": "2026-07-27T09:23:37.133Z"
+    },
+    "kakavashaa_king": {
+      "ign": "Kakavashaa",
+      "sheet_owner": "King",
+      "balance": 0,
+      "total": 0,
+      "fine": 0,
+      "last_updated": "2026-07-27T09:23:37.138Z"
+    },
+    "lukethedemon_king": {
+      "ign": "Lukethedemon",
+      "sheet_owner": "King",
+      "balance": 0,
+      "total": 0,
+      "fine": 0,
+      "last_updated": "2026-07-27T09:23:37.145Z"
+    },
+    "joseph_king": {
+      "ign": "joseph",
+      "sheet_owner": "King",
+      "balance": -31.5,
+      "total": -28,
+      "fine": 0,
+      "last_updated": "2026-07-27T09:23:37.155Z"
+    },
+    "styleofm_king": {
+      "ign": "styleofm",
+      "sheet_owner": "King",
+      "balance": 0,
+      "total": 0,
+      "fine": 0,
+      "last_updated": "2026-07-27T09:23:37.161Z"
+    },
+    "wiarsana_king": {
+      "ign": "wiarsana",
+      "sheet_owner": "King",
+      "balance": 6.6,
+      "total": 0,
+      "fine": 0,
+      "last_updated": "2026-07-27T09:23:37.167Z"
+    },
+    "blackheart_king": {
+      "ign": "blackheart",
+      "sheet_owner": "King",
+      "balance": 0,
+      "total": 0,
+      "fine": 0,
+      "last_updated": "2026-07-27T09:23:37.173Z"
+    },
+    "enolaraven_king": {
+      "ign": "enolaraven",
+      "sheet_owner": "King",
+      "balance": 5.46,
+      "total": 0,
+      "fine": 0,
+      "last_updated": "2026-07-27T09:23:37.178Z"
+    },
+    "ikram_king": {
+      "ign": "ikram",
+      "sheet_owner": "King",
+      "balance": 0,
+      "total": 0,
+      "fine": 0,
+      "last_updated": "2026-07-27T09:23:37.184Z"
+    },
+    "azmir_king": {
+      "ign": "Azmir",
+      "sheet_owner": "King",
+      "balance": 0,
+      "total": 0,
+      "fine": 0,
+      "last_updated": "2026-07-27T09:23:37.189Z"
+    },
+    "xxtentetionxx_king": {
+      "ign": "XXtentetionXX",
+      "sheet_owner": "King",
+      "balance": 0,
+      "total": 0,
+      "fine": 0,
+      "last_updated": "2026-07-27T09:23:37.195Z"
+    },
+    "fjigyn_king": {
+      "ign": "fjigyn",
+      "sheet_owner": "King",
+      "balance": 0,
+      "total": 0,
+      "fine": 0,
+      "last_updated": "2026-07-27T09:23:37.200Z"
+    },
+    "3zamauh_king": {
+      "ign": "3zamauh",
+      "sheet_owner": "King",
+      "balance": 0,
+      "total": 0,
+      "fine": 0,
+      "last_updated": "2026-07-27T09:23:37.205Z"
+    },
+    "nameless_king": {
+      "ign": "nameless",
+      "sheet_owner": "King",
+      "balance": 0,
+      "total": 0,
+      "fine": 0,
+      "last_updated": "2026-07-27T09:23:37.210Z"
+    },
+    "khovan_king": {
+      "ign": "khovan",
+      "sheet_owner": "King",
+      "balance": 0,
+      "total": 0,
+      "fine": 0,
+      "last_updated": "2026-07-27T09:23:37.216Z"
+    },
+    "edward_king": {
+      "ign": "edward",
+      "sheet_owner": "King",
+      "balance": 0,
+      "total": 0,
+      "fine": 0,
+      "last_updated": "2026-07-27T09:23:37.222Z"
+    },
+    "dora_king": {
+      "ign": "Dora",
+      "sheet_owner": "King",
+      "balance": 0,
+      "total": 0,
+      "fine": 0,
+      "last_updated": "2026-07-27T09:23:37.227Z"
+    },
+    "flick_king": {
+      "ign": "flick",
+      "sheet_owner": "King",
+      "balance": 0,
+      "total": 0,
+      "fine": 0,
+      "last_updated": "2026-07-27T09:23:37.234Z"
+    }
+  }
+}
