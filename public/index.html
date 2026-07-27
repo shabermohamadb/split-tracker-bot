@@ -244,6 +244,38 @@
     </footer>
   </div>
 
+  <!-- Floating Chatbot Widget -->
+  <div class="chatbot-widget">
+    <button id="chatbot-toggle" class="chatbot-toggle" aria-label="Open Chatbot">
+      <span class="chat-icon">💬</span>
+      <span class="chat-badge hidden">1</span>
+    </button>
+    
+    <div id="chatbot-container" class="chatbot-container hidden">
+      <div class="chatbot-header">
+        <div class="chatbot-title">
+          <span class="bot-avatar">🤖</span>
+          <div>
+            <h4>Vinland Assistant</h4>
+            <span class="online-indicator">Online</span>
+          </div>
+        </div>
+        <button id="chatbot-close" class="chatbot-close">&times;</button>
+      </div>
+      
+      <div id="chatbot-messages" class="chatbot-messages">
+        <div class="message bot-message">
+          <p>Hey bro! 📓 I'm your Vinland AI Assistant. Ask me anything about your loot splits, commands, or just chat!</p>
+        </div>
+      </div>
+      
+      <div class="chatbot-input-container">
+        <input type="text" id="chatbot-input" placeholder="Ask something..." autocomplete="off">
+        <button id="chatbot-send-btn">Send</button>
+      </div>
+    </div>
+  </div>
+
   <!-- JavaScript -->
   <script src="/app.js"></script>
 </body>

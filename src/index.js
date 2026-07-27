@@ -91,6 +91,33 @@ const server = http.createServer(async (req, res) => {
         owner1: config.owner1,
         owner2: config.owner2
       }));
+    } else if (pathname === '/api/chat' && req.method === 'POST') {
+      let body = '';
+      req.on('data', chunk => {
+        body += chunk;
+      });
+      req.on('end', async () => {
+        try {
+          const data = JSON.parse(body);
+          if (!data.prompt) {
+            res.writeHead(400, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: 'Prompt is required' }));
+            return;
+          }
+          const aiClient = require('./ai/client');
+          const systemMsg = { 
+            role: 'system', 
+            content: 'You are a super friendly, helpful AI chat assistant on the Split Tracker Loot Dashboard website. Answer questions about loot tracking or write in a friendly manner. Keep responses concise.' 
+          };
+          const userMsg = { role: 'user', content: data.prompt };
+          const result = await aiClient.getCompletion([systemMsg, userMsg], { model: 'google/gemini-flash-latest' });
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ success: true, response: result.content }));
+        } catch (err) {
+          res.writeHead(500, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ error: err.message }));
+        }
+      });
     } else if (pathname === '/api/status') {
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({

@@ -480,3 +480,105 @@ async function loadDatabaseLinks() {
 
 // Launch
 window.addEventListener('DOMContentLoaded', init);
+
+// Chatbot Widget Logic
+window.addEventListener('DOMContentLoaded', () => {
+  const toggleBtn = document.getElementById('chatbot-toggle');
+  const container = document.getElementById('chatbot-container');
+  const closeBtn = document.getElementById('chatbot-close');
+  const messagesDiv = document.getElementById('chatbot-messages');
+  const inputEl = document.getElementById('chatbot-input');
+  const sendBtn = document.getElementById('chatbot-send-btn');
+  const badge = toggleBtn.querySelector('.chat-badge');
+
+  let isFirstOpen = true;
+
+  toggleBtn.addEventListener('click', () => {
+    container.classList.toggle('hidden');
+    badge.classList.add('hidden');
+    if (!container.classList.contains('hidden')) {
+      inputEl.focus();
+      if (isFirstOpen) {
+        isFirstOpen = false;
+      }
+    }
+  });
+
+  closeBtn.addEventListener('click', () => {
+    container.classList.add('hidden');
+  });
+
+  function appendMessage(text, sender) {
+    const msgDiv = document.createElement('div');
+    msgDiv.className = `message ${sender}-message`;
+    msgDiv.innerHTML = `<p>${escapeHtml(text)}</p>`;
+    messagesDiv.appendChild(msgDiv);
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+  }
+
+  function escapeHtml(unsafe) {
+    return unsafe
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+
+  async function handleSendMessage() {
+    const prompt = inputEl.value.trim();
+    if (!prompt) return;
+
+    inputEl.value = '';
+    appendMessage(prompt, 'user');
+
+    const typingIndicator = document.createElement('div');
+    typingIndicator.className = 'typing-indicator';
+    typingIndicator.innerHTML = `
+      <div class="typing-dot"></div>
+      <div class="typing-dot"></div>
+      <div class="typing-dot"></div>
+    `;
+    messagesDiv.appendChild(typingIndicator);
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+    try {
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ prompt })
+      });
+
+      typingIndicator.remove();
+
+      if (!res.ok) {
+        throw new Error('API error');
+      }
+
+      const data = await res.json();
+      if (data.success && data.response) {
+        appendMessage(data.response, 'bot');
+      } else {
+        appendMessage('❌ Sorry, I encountered an error. Please try again.', 'bot');
+      }
+    } catch (err) {
+      typingIndicator.remove();
+      appendMessage('❌ Failed to connect. Make sure the bot is online!', 'bot');
+    }
+  }
+
+  sendBtn.addEventListener('click', handleSendMessage);
+  inputEl.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+      handleSendMessage();
+    }
+  });
+
+  setTimeout(() => {
+    if (container.classList.contains('hidden')) {
+      badge.classList.remove('hidden');
+    }
+  }, 3000);
+});
